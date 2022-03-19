@@ -8,7 +8,8 @@
         "sptr",
         "strv",
         "toindex",
-        "VFUNC"
+        "VFUNC",
+        "wheapstr"
     ],
     "files.associations": {
         "string": "cpp",

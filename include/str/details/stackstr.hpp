@@ -118,7 +118,11 @@ public:
 
     STR_CONSTEXPR void clear() STR_NOEXCEPT override
     {
-        size_ = 0;
+        if (size_ > 0)
+        {
+            size_ = 0;
+            data_[0] = '\0';
+        }
     }
 
     STR_CONSTEXPR void resize(size_type count, value_type c) override {}

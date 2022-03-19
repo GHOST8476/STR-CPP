@@ -808,6 +808,11 @@ protected:
         }
     }
 
+    STR_CONSTEXPR void assert_length_(size_type size) const
+    {
+        assert_<std::length_error>(size > max_size(), "");
+    }
+
     STR_CONSTEXPR void assert_range_(size_type index, size_type min, size_type max, const char *msg) const
     {
         assert_<std::out_of_range>(index >= min && index <= max, msg);

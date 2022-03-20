@@ -342,11 +342,15 @@ public:
 protected:
     STR_CONSTEXPR_VFUNC void insert_(size_type index, size_type count)
     {
-        assert_range_(index);
-        assert_space_(count);
+        assert_length_(index, "'index' was out of 'max_length'");
+        assert_length_(count, "'count' was out of 'max_length'");
+        assert_range_(index, "'index' was out of range");
 
         auto ptr = data();
         auto len = size();
+        reserve(len + count);
+
+        assert_space_(count);
 
         // pos of new null character
         size_type i = len + count;
@@ -631,16 +635,16 @@ protected:
         return compare(s, count) == 0;
     }
 
-    template <typename StringView>
-    STR_CONSTEXPR bool starts_with(const StringView &sv) const STR_NOEXCEPT
+    template <typename StringLike>
+    STR_CONSTEXPR bool starts_with(const StringLike &str) const STR_NOEXCEPT
     {
-        return compare(sv);
+        return compare(str);
     }
 
-    template <typename StringView>
-    STR_CONSTEXPR bool starts_with(const StringView &sv, size_type pos, size_type count) const STR_NOEXCEPT
+    template <typename StringLike>
+    STR_CONSTEXPR bool starts_with(const StringLike &str, size_type pos, size_type count) const STR_NOEXCEPT
     {
-        return compare(sv, pos, count);
+        return compare(str, pos, count);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -662,16 +666,16 @@ protected:
         return compare(size() - count, count, s, count) == 0;
     }
 
-    template <typename StringView>
-    STR_CONSTEXPR bool ends_with(const StringView &sv) const STR_NOEXCEPT
+    template <typename StringLike>
+    STR_CONSTEXPR bool ends_with(const StringLike &str) const STR_NOEXCEPT
     {
-        return ends_with(getptr_(sv), getsize_(sv));
+        return ends_with(getptr_(str), getsize_(str));
     }
 
-    template <typename StringView>
-    STR_CONSTEXPR bool ends_with(const StringView &sv, size_type pos, size_type count) const STR_NOEXCEPT
+    template <typename StringLike>
+    STR_CONSTEXPR bool ends_with(const StringLike &str, size_type pos, size_type count) const STR_NOEXCEPT
     {
-        return ends_with(getptr_(sv) + pos, count);
+        return ends_with(getptr_(str) + pos, count);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -688,8 +692,8 @@ protected:
         return find(s) != npos;
     }
 
-    template <typename StringView>
-    STR_CONSTEXPR bool contains(const StringView &sv) const STR_NOEXCEPT_IF(find(sv))
+    template <typename StringLike>
+    STR_CONSTEXPR bool contains(const StringLike &str) const STR_NOEXCEPT_IF(find(sv))
     {
         return find(sv) != npos;
     }
@@ -742,9 +746,9 @@ protected:
     /// find
     //////////////////////////////////////////////////////////////////////
 
-    STR_CONSTEXPR size_type find(const value_type *s, size_type index, size_type count) const
+    STR_CONSTEXPR size_type find(value_type ch, size_type index = 0) const STR_NOEXCEPT
     {
-        return find_(s, index, count);
+        return find_(ch, index);
     }
 
     STR_CONSTEXPR size_type find(const value_type *s, size_type index = 0) const
@@ -752,20 +756,21 @@ protected:
         return find_(s, index, traits_type::length(s));
     }
 
-    STR_CONSTEXPR size_type find(const basic_str &str, size_type index = 0) const STR_NOEXCEPT
+    STR_CONSTEXPR size_type find(const value_type *s, size_type index, size_type count) const
     {
-        return find_(str.data(), index, str.size());
+        return find_(s, index, count);
     }
 
-    STR_CONSTEXPR size_type find(value_type ch, size_type index = 0) const STR_NOEXCEPT
+    template <class StringLike>
+    STR_CONSTEXPR size_type find(const StringLike &str, size_type index = 0, size_type count = npos) const STR_NOEXCEPT
     {
-        return find_(ch, index);
-    }
+        auto len = getsize_(str);
+        if (count == npos || count > len - index)
+        {
+            count = len;
+        }
 
-    template <class StringView>
-    STR_CONSTEXPR size_type find(const StringView &sv, size_type index = 0) const STR_NOEXCEPT
-    {
-        return find_(getptr_(sv), index);
+        return find_(getptr_(str), index, count);
     }
 
 protected:
@@ -784,15 +789,20 @@ protected:
     {
         assert_range_(index);
 
-        size_type pos = index;
-        auto data = data();
-        while (pos < index + count)
+        auto pos = index;
+        auto data_ptr = data();
+        auto len = size();
+
+        while (pos < len - count)
         {
-            auto pos = find_(s[0], pos); // find first character
-            if (pos == npos)             // return failure if character not found
+            // find first character
+            const_pointer ptr = traits_type::find(data_ptr, size() - index, ch);
+            if (ptr == nullptr) // return failure if first character not found
                 return npos;
 
-            if (traits_type::compare(data, s, count) == 0)
+            pos = ptr - data_ptr;
+            // if found compare the string
+            if (traits_type::compare(data_ptr, s, count) == 0)
                 return pos;
 
             pos++;
@@ -815,29 +825,29 @@ protected:
         }
     }
 
-    STR_CONSTEXPR void assert_length_(size_type size) const
+    STR_CONSTEXPR void assert_length_(size_type size, const char *msg = nullptr) const
     {
-        assert_<std::length_error>(size > max_size(), "");
+        assert_<std::length_error>(size > max_size(), msg == nullptr ? "'max_length' reached" : msg);
     }
 
-    STR_CONSTEXPR void assert_range_(size_type index, size_type min, size_type max, const char *msg) const
+    STR_CONSTEXPR void assert_range_(size_type index, size_type min, size_type max, const char *msg = nullptr) const
     {
-        assert_<std::out_of_range>(index >= min && index <= max, msg);
+        assert_<std::out_of_range>(index >= min && index <= max, msg == nullptr ? "'index' was out of range" : msg);
     }
 
-    STR_CONSTEXPR void assert_range_(size_type index) const
+    STR_CONSTEXPR void assert_range_(size_type index, const char *msg = nullptr) const
     {
-        assert_range_(index, 0, size(), "index was out of range");
+        assert_<std::out_of_range>(index >= 0 && index <= size(), msg == nullptr ? "'index' was out of range" : msg);
     }
 
-    STR_CONSTEXPR void assert_space_(size_type space) const
+    STR_CONSTEXPR void assert_space_(size_type space, const char *msg = nullptr) const
     {
-        assert_<std::length_error>((capacity() - size()) >= space, "not enough space");
+        assert_<std::length_error>(space >= capacity() - size(), msg == nullptr ? "not enough space" : msg);
     }
 
-    STR_CONSTEXPR void assert_null_(const void *ptr, const char *msg) const
+    STR_CONSTEXPR void assert_null_(const void *ptr, const char *msg = nullptr) const
     {
-        assert_<std::invalid_argument>(ptr != nullptr, msg);
+        assert_<std::invalid_argument>(ptr != nullptr, msg == nullptr ? "null argument passed" : msg);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////

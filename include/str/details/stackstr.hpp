@@ -127,8 +127,6 @@ public:
 
     STR_CONSTEXPR void resize(size_type count, value_type c) override {}
 
-    STR_CONSTEXPR void swap(basic_str &other) override {}
-
 protected:
     Char data_[Size];
     size_type size_ = 0;

@@ -78,15 +78,15 @@ public:
         append(ilist);
     }
 
-    template <typename String>
-    STR_CONSTEXPR basic_heapstr(const String &str, size_type str_index = 0, const Allocator &alloc = Allocator())
+    template <typename StringLike>
+    STR_CONSTEXPR basic_heapstr(const StringLike &str, size_type str_index = 0, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(str, str_index, npos);
     }
 
-    template <typename String>
-    STR_CONSTEXPR basic_heapstr(const String &str, size_type str_index = 0, size_type str_count = npos, const Allocator &alloc = Allocator())
+    template <typename StringLike>
+    STR_CONSTEXPR basic_heapstr(const StringLike &str, size_type str_index = 0, size_type str_count = npos, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(str, str_index, str_count);
@@ -200,8 +200,6 @@ public:
             alloc_.deallocate(old_ptr, old_cap);
         }
     }
-
-    STR_CONSTEXPR void swap(basic_str &other) override {}
 
 protected:
     value_type *data_ = nullptr;

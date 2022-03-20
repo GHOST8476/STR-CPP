@@ -773,7 +773,11 @@ protected:
     {
         assert_range_(index);
 
-        return npos;
+        const_pointer ptr = traits_type::find(data(), size() - index, ch);
+        if (ptr == nullptr)
+            return npos;
+
+        return ptr - data();
     }
 
     STR_CONSTEXPR size_type find_(const value_type *s, size_type index, size_type count) const
@@ -781,14 +785,17 @@ protected:
         assert_range_(index);
 
         size_type pos = index;
+        auto data = data();
         while (pos < index + count)
         {
-            auto pos = find_(s[0], pos);
-            if (pos == npos)
+            auto pos = find_(s[0], pos); // find first character
+            if (pos == npos)             // return failure if character not found
                 return npos;
 
-            if (traits_type::find())
+            if (traits_type::compare(data, s, count) == 0)
                 return pos;
+
+            pos++;
         }
 
         return npos;

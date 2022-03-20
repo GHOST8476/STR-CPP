@@ -28,41 +28,66 @@ public:
     // CONSTRUCTORS / DESTRUCTOR
     //////////////////////////////////////////////////////////////////////
 
-    STR_CONSTEXPR basic_heapstr() STR_NOEXCEPT = default;
     STR_CONSTEXPR ~basic_heapstr() STR_NOEXCEPT = default;
 
-    STR_CONSTEXPR basic_heapstr(size_type size)
+    STR_CONSTEXPR basic_heapstr(const Allocator &alloc = Allocator())
+        : alloc_{alloc} {}
+
+    template <typename OtherCharTraits, typename OtherAllocator>
+    STR_CONSTEXPR basic_heapstr(basic_heapstr<Char, OtherCharTraits, OtherAllocator> &&other
+                                const Allocator &alloc = Allocator()) : alloc_{alloc}
+    {
+        std::swap(data_, other.data_);
+        std::swap(size_, other.size_);
+        std::swap(capacity_, other.capacity_);
+    }
+
+    STR_CONSTEXPR basic_heapstr(size_type size, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         resize(size);
     }
 
-    STR_CONSTEXPR basic_heapstr(value_type ch, size_type count)
+    STR_CONSTEXPR basic_heapstr(value_type ch, size_type count, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         append(ch, count);
     }
 
-    STR_CONSTEXPR basic_heapstr(const value_type *s)
+    STR_CONSTEXPR basic_heapstr(const value_type *s, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         append(s);
     }
-    STR_CONSTEXPR basic_heapstr(const value_type *s, size_type count)
+    STR_CONSTEXPR basic_heapstr(const value_type *s, size_type count, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         append(s, count);
     }
 
     template <typename InputIt>
-    STR_CONSTEXPR basic_heapstr(InputIt first, InputIt last)
+    STR_CONSTEXPR basic_heapstr(InputIt first, InputIt last, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         append(first, last);
     }
 
-    STR_CONSTEXPR basic_heapstr(std::initializer_list<value_type> ilist)
+    STR_CONSTEXPR basic_heapstr(std::initializer_list<value_type> ilist, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         append(ilist);
     }
 
     template <typename String>
-    STR_CONSTEXPR basic_heapstr(const String &str, size_type str_index = 0, size_type str_count = npos)
+    STR_CONSTEXPR basic_heapstr(const String &str, size_type str_index = 0, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
+    {
+        append(str, str_index, npos);
+    }
+
+    template <typename String>
+    STR_CONSTEXPR basic_heapstr(const String &str, size_type str_index = 0, size_type str_count = npos, const Allocator &alloc = Allocator())
+        : alloc_{alloc}
     {
         append(str, str_index, str_count);
     }

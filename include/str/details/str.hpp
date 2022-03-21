@@ -51,23 +51,23 @@ public:
     STR_CONSTEXPR reference at(size_type pos)
     {
         assert_range_(pos);
-        return operator[pos];
+        return operator[](pos);
     }
     STR_CONSTEXPR const_reference at(size_type pos) const
     {
         assert_range_(pos);
-        return operator[pos];
+        return operator[](pos);
     }
 
     /// Accesses the specified character.
     /// @note no bound checking is performed.
     STR_CONSTEXPR reference operator[](size_type pos)
     {
-        return data() + pos;
+        return *(data() + pos);
     }
     STR_CONSTEXPR const_reference operator[](size_type pos) const
     {
-        return data() + pos;
+        return *(data() + pos);
     }
 
     /// Returns reference to the first character in the string.
@@ -75,11 +75,11 @@ public:
     /// @details Returns operator[0]
     STR_CONSTEXPR reference front()
     {
-        return operator[0];
+        return operator[](0);
     }
     STR_CONSTEXPR const_reference front() const
     {
-        return operator[0];
+        return operator[](0);
     }
 
     /// Returns reference to the last character in the string.
@@ -87,11 +87,11 @@ public:
     /// @details Returns operator[size() - 1]
     STR_CONSTEXPR reference back()
     {
-        return operator[size() - 1];
+        return operator[](size() - 1);
     }
     STR_CONSTEXPR const_reference back() const
     {
-        return operator[size() - 1];
+        return operator[](size() - 1);
     }
 
     /// Returns a pointer to the first character of a string.
@@ -136,58 +136,58 @@ public:
     /// Returns an iterator to the character following the last character of the string (null character).
     STR_CONSTEXPR iterator end() STR_NOEXCEPT
     {
-        return it(size());
+        return it(size() - 1);
     }
     STR_CONSTEXPR const_iterator end() const STR_NOEXCEPT
     {
-        return it(size());
+        return it(size() - 1);
     }
     STR_CONSTEXPR const_iterator cend() const STR_NOEXCEPT
     {
-        return cit(size());
+        return cit(size() - 1);
     }
 
     /// Returns a reverse iterator to the given index.
     /// Indexing starts in reverse order
-    STR_CONSTEXPR iterator rit(size_type index) STR_NOEXCEPT
+    STR_CONSTEXPR reverse_iterator rit(size_type index) STR_NOEXCEPT
     {
         return reverse_iterator(it(size() - index));
     }
-    STR_CONSTEXPR const_iterator rit(size_type index) const STR_NOEXCEPT
+    STR_CONSTEXPR const_reverse_iterator rit(size_type index) const STR_NOEXCEPT
     {
         return const_reverse_iterator(it(size() - index));
     }
-    STR_CONSTEXPR const_iterator crit(size_type index) const STR_NOEXCEPT
+    STR_CONSTEXPR const_reverse_iterator crit(size_type index) const STR_NOEXCEPT
     {
         return const_reverse_iterator(it(size() - index));
     }
 
     /// Returns a reverse iterator to the first character of the reversed string.
-    STR_CONSTEXPR iterator rbegin() STR_NOEXCEPT
+    STR_CONSTEXPR reverse_iterator rbegin() STR_NOEXCEPT
     {
         return rit(0);
     }
-    STR_CONSTEXPR const_iterator rbegin() const STR_NOEXCEPT
+    STR_CONSTEXPR const_reverse_iterator rbegin() const STR_NOEXCEPT
     {
         return rit(0);
     }
-    STR_CONSTEXPR const_iterator crbegin() const STR_NOEXCEPT
+    STR_CONSTEXPR const_reverse_iterator crbegin() const STR_NOEXCEPT
     {
         return crit(0);
     }
 
     /// Returns a reverse iterator to the character following the last character of the reversed string.
-    STR_CONSTEXPR iterator rend() STR_NOEXCEPT
+    STR_CONSTEXPR reverse_iterator rend() STR_NOEXCEPT
     {
-        return crit(size());
+        return rit(size() - 1);
     }
-    STR_CONSTEXPR const_iterator rend() const STR_NOEXCEPT
+    STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
     {
-        return crit(size());
+        return rit(size() - 1);
     }
-    STR_CONSTEXPR const_iterator crend() const STR_NOEXCEPT
+    STR_CONSTEXPR const_reverse_iterator crend() const STR_NOEXCEPT
     {
-        return crit(size());
+        return crit(size() - 1);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -908,7 +908,7 @@ public:
 
 public:
     STR_CONSTEXPR const_iterator() STR_NOEXCEPT = default;
-    STR_CONSTEXPR const_iterator(value_type *ptr) STR_NOEXCEPT : ptr_{ptr} {}
+    STR_CONSTEXPR const_iterator(const value_type *ptr) STR_NOEXCEPT : ptr_{ptr} {}
     STR_CONSTEXPR ~const_iterator() STR_NOEXCEPT = default;
 
     STR_NODISCARD STR_CONSTEXPR reference operator*() const STR_NOEXCEPT
@@ -1009,7 +1009,7 @@ public:
 #endif
 
 protected:
-    value_type *ptr_ = nullptr;
+    const value_type *ptr_ = nullptr;
 };
 
 template <typename Char, typename CharTraits, typename Allocator>
@@ -1022,11 +1022,11 @@ public:
 
     STR_NODISCARD STR_CONSTEXPR reference operator*() const STR_NOEXCEPT
     {
-        return *ptr_;
+        return *const_cast<pointer>(ptr_);
     }
     STR_NODISCARD STR_CONSTEXPR pointer operator->() const STR_NOEXCEPT
     {
-        return ptr_;
+        return const_cast<pointer>(ptr_);
     }
 };
 

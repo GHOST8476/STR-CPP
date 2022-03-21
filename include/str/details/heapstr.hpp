@@ -134,28 +134,29 @@ public:
     // OPERATIONS
     //////////////////////////////////////////////////////////////////////
 
-    STR_CONSTEXPR void resize(size_type count, value_type ch) override
+    STR_CONSTEXPR void resize(size_type cap, value_type ch) override
     {
-        assert_length_(count);
-        if (capacity_ == count)
+        assert_length_(cap);
+
+        if (capacity_ == cap)
             return;
 
         pointer ptr = nullptr;
-        if (count > 0)
+        if (cap > 0)
         {
-            ptr = alloc_.allocate(count);
+            ptr = alloc_.allocate(cap);
             if (ptr == nullptr)
                 return;
 
-            if (count < size_)
+            if (cap < size_)
             {
-                std::memcpy(ptr, data_, count - 1);
-                ptr[count] = '\0';
+                std::memcpy(ptr, data_, cap - 1);
+                ptr[cap] = '\0';
             }
             else
             {
                 std::memcpy(ptr, data_, size_);
-                std::memset(ptr + count, ch, count - size_);
+                std::memset(ptr + cap, ch, cap - size_);
             }
         }
 
@@ -165,7 +166,7 @@ public:
 
         // write new data, old data is cached
         data_ = ptr;
-        capacity_ = count;
+        capacity_ = cap;
         size_ = std::min(size_, capacity_);
 
         // use old data, new data is written already,
@@ -174,10 +175,16 @@ public:
         {
             alloc_.deallocate(old_ptr, old_cap);
         }
+
+        // std::cout << "size: " << size_
+        //           << " | capacity: " << capacity_
+        //           << " | required: " << cap
+        //           << " | data: " << (void *)data_
+        //           << std::endl;
     }
 
 protected:
-    value_type *data_ = nullptr;
+    pointer data_ = nullptr;
     size_type size_ = 0;
     size_type capacity_ = 0;
     Allocator alloc_;

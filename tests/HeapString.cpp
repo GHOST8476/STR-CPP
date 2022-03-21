@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <str/heapstr>
 
-TEST(StackString, Constructor)
+TEST(HeapString, Constructor)
 {
     using heapstr_t = str::heapstr;
 

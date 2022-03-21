@@ -200,11 +200,11 @@ public:
 
     /// Reserves at least new_cap storage.
     /// If new_cap is less than or equal to the current capacity(), there is no effect.
-    STR_CONSTEXPR void reserve(size_type new_cap)
+    STR_CONSTEXPR void reserve(size_type required)
     {
-        if (capacity() < size())
+        if (capacity() < required)
         {
-            resize(size());
+            resize(required);
         }
     }
 
@@ -363,14 +363,14 @@ protected:
         assert_length_(count, "'count' was out of 'max_length'");
         assert_range_(index, "'index' was out of range");
 
-        auto ptr = data();
         auto len = size();
         reserve(len + count);
 
         assert_space_(count);
+        auto ptr = data();
 
         // pos of new null character
-        size_type i = len + count;
+        size_type i = len + count - 1;
 
         // write null character
         ptr[i--] = '\0';

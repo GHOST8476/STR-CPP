@@ -103,27 +103,14 @@ public:
         return Size;
     }
 
-    STR_CONSTEXPR void reserve(size_type new_cap) STR_NOEXCEPT {}
-
     STR_CONSTEXPR size_type capacity() const STR_NOEXCEPT override
     {
         return Size;
     }
 
-    STR_CONSTEXPR void shrink_to_fit() override {}
-
     //////////////////////////////////////////////////////////////////////
     // OPERATIONS
     //////////////////////////////////////////////////////////////////////
-
-    STR_CONSTEXPR void clear() STR_NOEXCEPT override
-    {
-        if (size_ > 0)
-        {
-            size_ = 0;
-            data_[0] = '\0';
-        }
-    }
 
     STR_CONSTEXPR void resize(size_type count, value_type c) override {}
 

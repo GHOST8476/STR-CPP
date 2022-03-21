@@ -34,7 +34,7 @@ public:
         : alloc_{alloc} {}
 
     template <typename OtherCharTraits, typename OtherAllocator>
-    STR_CONSTEXPR basic_heapstr(basic_heapstr<Char, OtherCharTraits, OtherAllocator> &&other
+    STR_CONSTEXPR basic_heapstr(basic_heapstr<Char, OtherCharTraits, OtherAllocator> &&other,
                                 const Allocator &alloc = Allocator()) : alloc_{alloc}
     {
         std::swap(data_, other.data_);
@@ -86,7 +86,7 @@ public:
     }
 
     template <typename StringLike>
-    STR_CONSTEXPR basic_heapstr(const StringLike &str, size_type str_index = 0, size_type str_count = npos, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_heapstr(const StringLike &str, size_type str_index, size_type str_count = npos, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(str, str_index, str_count);
@@ -122,15 +122,7 @@ public:
 
     STR_CONSTEXPR size_type max_size() const STR_NOEXCEPT override
     {
-        return Size;
-    }
-
-    STR_CONSTEXPR void reserve(size_type size) override
-    {
-        if (capacity_ < size)
-        {
-            resize(size);
-        }
+        return alloc_.max_size();
     }
 
     STR_CONSTEXPR size_type capacity() const STR_NOEXCEPT override
@@ -138,26 +130,9 @@ public:
         return capacity_;
     }
 
-    STR_CONSTEXPR void shrink_to_fit() override
-    {
-        if (size_ == capacity_)
-            return;
-
-        resize(size_);
-    }
-
     //////////////////////////////////////////////////////////////////////
     // OPERATIONS
     //////////////////////////////////////////////////////////////////////
-
-    STR_CONSTEXPR void clear() STR_NOEXCEPT override
-    {
-        size_ = 0;
-        if (data_)
-        {
-            data_[0] = '\0';
-        }
-    }
 
     STR_CONSTEXPR void resize(size_type count, value_type ch) override
     {
@@ -174,22 +149,22 @@ public:
 
             if (count < size_)
             {
-                std::memcpy(ptr, ptr_, count - 1);
+                std::memcpy(ptr, data_, count - 1);
                 ptr[count] = '\0';
             }
             else
             {
-                std::memcpy(ptr, ptr_, size_);
+                std::memcpy(ptr, data_, size_);
                 std::memset(ptr + count, ch, count - size_);
             }
         }
 
         // cache old data for exception safety
-        auto old_ptr = ptr_;
+        auto old_ptr = data_;
         auto old_cap = capacity_;
 
         // write new data, old data is cached
-        ptr_ = ptr;
+        data_ = ptr;
         capacity_ = count;
         size_ = std::min(size_, capacity_);
 
@@ -208,19 +183,10 @@ protected:
     Allocator alloc_;
 };
 
-template <size_t Size>
-using heapstr = basic_heapstr<Size, char>;
-
-template <size_t Size>
-using wheapstr = basic_heapstr<Size, wchar_t>;
-
-template <size_t Size>
-using u8heapstr = basic_heapstr<Size, char8_t>;
-
-template <size_t Size>
-using u16heapstr = basic_heapstr<Size, char16_t>;
-
-template <size_t Size>
-using u32heapstr = basic_heapstr<Size, char32_t>;
+using heapstr = basic_heapstr<char>;
+using wheapstr = basic_heapstr<wchar_t>;
+using u8heapstr = basic_heapstr<char8_t>;
+using u16heapstr = basic_heapstr<char16_t>;
+using u32heapstr = basic_heapstr<char32_t>;
 
 STR_NAMESPACE_MAIN_END

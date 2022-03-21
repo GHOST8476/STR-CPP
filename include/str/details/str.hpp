@@ -195,15 +195,27 @@ public:
     /// Returns the maximum number of elements the string is able to hold.
     STR_CONSTEXPR_VFUNC size_type max_size() const STR_NOEXCEPT = 0;
 
-    /// Reserves at least new_cap storage.
-    /// If new_cap is less than or equal to the current capacity(), there is no effect.
-    STR_CONSTEXPR_VFUNC void reserve(size_type new_cap) STR_NOEXCEPT = 0;
-
     /// Returns the number of characters that the string has currently allocated space for.
     STR_CONSTEXPR_VFUNC size_type capacity() const STR_NOEXCEPT = 0;
 
+    /// Reserves at least new_cap storage.
+    /// If new_cap is less than or equal to the current capacity(), there is no effect.
+    STR_CONSTEXPR void reserve(size_type new_cap)
+    {
+        if (capacity() < size())
+        {
+            resize(size());
+        }
+    }
+
     /// Requests the removal of unused capacity.
-    STR_CONSTEXPR_VFUNC void shrink_to_fit() = 0;
+    STR_CONSTEXPR void shrink_to_fit()
+    {
+        if (size() == capacity())
+            return;
+
+        resize(size());
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// OPERATIONS
@@ -214,7 +226,12 @@ public:
     //////////////////////////////////////////////////////////////////////
 
     /// Clears the contents.
-    STR_CONSTEXPR_VFUNC void clear() STR_NOEXCEPT = 0;
+    STR_CONSTEXPR void clear() STR_NOEXCEPT
+    {
+        set_size_(0);
+        if (data())
+            *data() = '\0';
+    }
 
     //////////////////////////////////////////////////////////////////////
     /// Insert
@@ -819,7 +836,7 @@ protected:
 
     STR_CONSTEXPR void assert_length_(size_type size, const char *msg = nullptr) const
     {
-        assert_<std::length_error>(size > max_size(), msg == nullptr ? "'max_length' reached" : msg);
+        assert_<std::length_error>(size <= max_size(), msg == nullptr ? "'max_length' reached" : msg);
     }
 
     STR_CONSTEXPR void assert_range_(size_type index, size_type min, size_type max, const char *msg = nullptr) const
@@ -834,7 +851,7 @@ protected:
 
     STR_CONSTEXPR void assert_space_(size_type space, const char *msg = nullptr) const
     {
-        assert_<std::length_error>(space >= capacity() - size(), msg == nullptr ? "not enough space" : msg);
+        assert_<std::length_error>(space <= capacity() - size(), msg == nullptr ? "not enough space" : msg);
     }
 
     STR_CONSTEXPR void assert_null_(const void *ptr, const char *msg = nullptr) const

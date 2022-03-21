@@ -3,10 +3,10 @@
 
 STR_NAMESPACE_MAIN_BEGIN
 
-template <typename Char, typename CharTraits = std::char_traits<char>, typename Allocator = std::allocator<Char>>
-class basic_heapstr : public basic_str<Char, CharTraits, Allocator>
+template <typename Size, typename Char, typename CharTraits = std::char_traits<char>, typename Allocator = std::allocator<Char>>
+class basic_bufstr : public basic_str<Char, CharTraits, Allocator>
 {
-    using this_t = basic_heapstr<Char, CharTraits, Allocator>;
+    using this_t = basic_bufstr<Size, Char, CharTraits, Allocator>;
 
 public:
     using base_t = basic_str<Char, CharTraits, Allocator>;
@@ -28,65 +28,65 @@ public:
     // CONSTRUCTORS / DESTRUCTOR
     //////////////////////////////////////////////////////////////////////
 
-    STR_CONSTEXPR ~basic_heapstr() STR_NOEXCEPT = default;
+    STR_CONSTEXPR ~basic_bufstr() STR_NOEXCEPT = default;
 
-    STR_CONSTEXPR basic_heapstr(const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(const Allocator &alloc = Allocator())
         : alloc_{alloc} {}
 
     template <typename OtherCharTraits, typename OtherAllocator>
-    STR_CONSTEXPR basic_heapstr(basic_heapstr<Char, OtherCharTraits, OtherAllocator> &&other,
-                                const Allocator &alloc = Allocator()) : alloc_{alloc}
+    STR_CONSTEXPR basic_bufstr(basic_bufstr<Char, OtherCharTraits, OtherAllocator> &&other,
+                               const Allocator &alloc = Allocator()) : alloc_{alloc}
     {
         std::swap(data_, other.data_);
         std::swap(size_, other.size_);
         std::swap(capacity_, other.capacity_);
     }
 
-    STR_CONSTEXPR basic_heapstr(size_type size, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(size_type size, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         resize(size);
     }
 
-    STR_CONSTEXPR basic_heapstr(value_type ch, size_type count, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(value_type ch, size_type count, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(ch, count);
     }
 
-    STR_CONSTEXPR basic_heapstr(const value_type *s, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(const value_type *s, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(s);
     }
-    STR_CONSTEXPR basic_heapstr(const value_type *s, size_type count, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(const value_type *s, size_type count, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(s, count);
     }
 
     template <typename InputIt>
-    STR_CONSTEXPR basic_heapstr(InputIt first, InputIt last, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(InputIt first, InputIt last, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(first, last);
     }
 
-    STR_CONSTEXPR basic_heapstr(std::initializer_list<value_type> ilist, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(std::initializer_list<value_type> ilist, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(ilist);
     }
 
     template <typename StringLike>
-    STR_CONSTEXPR basic_heapstr(const StringLike &str, size_type str_index = 0, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(const StringLike &str, size_type str_index = 0, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(str, str_index, npos);
     }
 
     template <typename StringLike>
-    STR_CONSTEXPR basic_heapstr(const StringLike &str, size_type str_index, size_type str_count = npos, const Allocator &alloc = Allocator())
+    STR_CONSTEXPR basic_bufstr(const StringLike &str, size_type str_index, size_type str_count = npos, const Allocator &alloc = Allocator())
         : alloc_{alloc}
     {
         append(str, str_index, str_count);
@@ -127,7 +127,7 @@ public:
 
     STR_CONSTEXPR size_type capacity() const STR_NOEXCEPT override
     {
-        return capacity_;
+        return std::max(Size, capacity_);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -135,6 +135,35 @@ public:
     //////////////////////////////////////////////////////////////////////
 
     STR_CONSTEXPR void resize(size_type cap, value_type ch) override
+    {
+        assert_length_(cap);
+
+        if (capacity_ == cap)
+            return;
+
+        if (cap <= Size && !is_stack())
+        {
+            std::memset(stack_, heap_, cap);
+            stack_[cap - 1] = '\0';
+            data_ = stack_;
+            return;
+        }
+
+        heap_resize_(cap);
+    }
+
+    STR_CONSTEXPR bool is_stack() const STR_NOEXCEPT
+    {
+        return data_ == stack_ ? true : false;
+    }
+
+    STR_CONSTEXPR bool is_heap() const STR_NOEXCEPT
+    {
+        return data_ == heap_ ? true : false;
+    }
+
+protected:
+    STR_CONSTEXPR void heap_resize_(size_type cap, value_type ch) override
     {
         assert_length_(cap);
 
@@ -178,16 +207,27 @@ public:
     }
 
 protected:
-    pointer data_ = nullptr;
+    value_type stack_[Size];
+    value_type* heap_ = nullptr;
+    value_type* data_ = stack_;
     size_type size_ = 0;
     size_type capacity_ = 0;
     Allocator alloc_;
 };
 
-using heapstr = basic_heapstr<char>;
-using wheapstr = basic_heapstr<wchar_t>;
-using u8heapstr = basic_heapstr<char8_t>;
-using u16heapstr = basic_heapstr<char16_t>;
-using u32heapstr = basic_heapstr<char32_t>;
+template <size_t Size>
+using bufstr = basic_bufstr<Size, char>;
+
+template <size_t Size>
+using wbufstr = basic_bufstr<Size, wchar_t>;
+
+template <size_t Size>
+using u8bufstr = basic_bufstr<Size, char8_t>;
+
+template <size_t Size>
+using u16bufstr = basic_bufstr<Size, char16_t>;
+
+template <size_t Size>
+using u32bufstr = basic_bufstr<Size, char32_t>;
 
 STR_NAMESPACE_MAIN_END

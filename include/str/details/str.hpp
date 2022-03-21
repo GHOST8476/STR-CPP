@@ -136,15 +136,15 @@ public:
     /// Returns an iterator to the character following the last character of the string (null character).
     STR_CONSTEXPR iterator end() STR_NOEXCEPT
     {
-        return it(size() - 1);
+        return it(size());
     }
     STR_CONSTEXPR const_iterator end() const STR_NOEXCEPT
     {
-        return it(size() - 1);
+        return it(size());
     }
     STR_CONSTEXPR const_iterator cend() const STR_NOEXCEPT
     {
-        return cit(size() - 1);
+        return cit(size());
     }
 
     /// Returns a reverse iterator to the given index.
@@ -179,15 +179,15 @@ public:
     /// Returns a reverse iterator to the character following the last character of the reversed string.
     STR_CONSTEXPR reverse_iterator rend() STR_NOEXCEPT
     {
-        return rit(size() - 1);
+        return rit(size());
     }
     STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
     {
-        return rit(size() - 1);
+        return rit(size());
     }
     STR_CONSTEXPR const_reverse_iterator crend() const STR_NOEXCEPT
     {
-        return crit(size() - 1);
+        return crit(size());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -47,16 +47,16 @@ public:
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// Accesses the specified character with bounds checking.
-    /// @throws std::out_of_range will be thrown on invalid access.
-    STR_CONSTEXPR reference at(size_type pos)
+    /// std::out_of_range will be thrown on invalid access.
+    STR_CONSTEXPR reference at(size_type index)
     {
-        assert_range_(pos);
-        return operator[](pos);
+        assert_range_(index);
+        return operator[](index);
     }
-    STR_CONSTEXPR const_reference at(size_type pos) const
+    STR_CONSTEXPR const_reference at(size_type index) const
     {
-        assert_range_(pos);
-        return operator[](pos);
+        assert_range_(index);
+        return operator[](index);
     }
 
     /// Accesses the specified character.

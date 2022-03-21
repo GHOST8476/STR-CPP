@@ -147,32 +147,47 @@ public:
         return cit(size());
     }
 
+    /// Returns a reverse iterator to the given index.
+    /// Indexing starts in reverse order
+    STR_CONSTEXPR iterator rit(size_type index) STR_NOEXCEPT
+    {
+        return reverse_iterator(it(size() - index));
+    }
+    STR_CONSTEXPR const_iterator rit(size_type index) const STR_NOEXCEPT
+    {
+        return const_reverse_iterator(it(size() - index));
+    }
+    STR_CONSTEXPR const_iterator crit(size_type index) const STR_NOEXCEPT
+    {
+        return const_reverse_iterator(it(size() - index));
+    }
+
     /// Returns a reverse iterator to the first character of the reversed string.
     STR_CONSTEXPR iterator rbegin() STR_NOEXCEPT
     {
-        return reverse_iterator(end());
+        return rit(0);
     }
     STR_CONSTEXPR const_iterator rbegin() const STR_NOEXCEPT
     {
-        return const_reverse_iterator(end());
+        return rit(0);
     }
     STR_CONSTEXPR const_iterator crbegin() const STR_NOEXCEPT
     {
-        return const_reverse_iterator(cend());
+        return crit(0);
     }
 
     /// Returns a reverse iterator to the character following the last character of the reversed string.
     STR_CONSTEXPR iterator rend() STR_NOEXCEPT
     {
-        return reverse_iterator(begin());
+        return crit(size());
     }
     STR_CONSTEXPR const_iterator rend() const STR_NOEXCEPT
     {
-        return const_reverse_iterator(begin());
+        return crit(size());
     }
     STR_CONSTEXPR const_iterator crend() const STR_NOEXCEPT
     {
-        return const_reverse_iterator(cbegin());
+        return crit(size());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////

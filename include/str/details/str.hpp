@@ -1208,4 +1208,232 @@ using u8str = basic_str<char8_t>;
 using u16str = basic_str<char16_t>;
 using u32str = basic_str<char32_t>;
 
+//////////////////////////////////////////////////////////////////////
+// Numeric Conversions
+//////////////////////////////////////////////////////////////////////
+
+// converts a string to a signed integer
+int stoi(const str &str, size_t *pos = nullptr, int base = 10)
+{
+    str::pointer ptr;
+    int result = static_cast<int>(
+        std::strtol(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+int stoi(const wstr &str, size_t *pos = nullptr, int base = 10)
+{
+    wstr::pointer ptr;
+    int result = static_cast<int>(
+        std::wcstol(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a signed long
+long stol(const str &str, size_t *pos = nullptr, int base = 10)
+{
+    str::pointer ptr;
+    long result = static_cast<long>(
+        std::strtol(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+long stol(const wstr &str, size_t *pos = nullptr, int base = 10)
+{
+    wstr::pointer ptr;
+    long result = static_cast<long>(
+        std::wcstol(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a signed long long
+long long stoll(const str &str, size_t *pos = nullptr, int base = 10)
+{
+    str::pointer ptr;
+    long long result = static_cast<long long>(
+        std::strtoll(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+long long stoll(const wstr &str, size_t *pos = nullptr, int base = 10)
+{
+    wstr::pointer ptr;
+    long long result = static_cast<long long>(
+        std::wcstoll(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a unsigned long
+unsigned long stoul(const str &str, size_t *pos = nullptr, int base = 10)
+{
+    str::pointer ptr;
+    unsigned long result = static_cast<unsigned long>(
+        std::strtoul(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+unsigned long stoul(const wstr &str, size_t *pos = nullptr, int base = 10)
+{
+    wstr::pointer ptr;
+    unsigned long result = static_cast<unsigned long>(
+        std::wcstoul(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a unsigned long long
+unsigned long long stoull(const str &str, size_t *pos = nullptr, int base = 10)
+{
+    str::pointer ptr;
+    unsigned long long result = static_cast<unsigned long long>(
+        std::strtoull(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+unsigned long long stoull(const wstr &str, size_t *pos = nullptr, int base = 10)
+{
+    wstr::pointer ptr;
+    unsigned long long result = static_cast<unsigned long long>(
+        std::wcstoull(str.c_str(), &ptr, base));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a signed integer
+float stof(const str &str, size_t *pos = nullptr)
+{
+    str::pointer ptr;
+    float result = static_cast<float>(
+        std::strtof(str.c_str(), &ptr));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+float stof(const wstr &str, size_t *pos = nullptr)
+{
+    wstr::pointer ptr;
+    float result = static_cast<float>(
+        std::wcstof(str.c_str(), &ptr));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a signed long
+long stod(const str &str, size_t *pos = nullptr)
+{
+    str::pointer ptr;
+    long result = static_cast<long>(
+        std::strtof(str.c_str(), &ptr));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+long stod(const wstr &str, size_t *pos = nullptr)
+{
+    wstr::pointer ptr;
+    long result = static_cast<long>(
+        std::wcstof(str.c_str(), &ptr));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
+// converts a string to a signed long long
+long long stold(const str &str, size_t *pos = nullptr)
+{
+    str::pointer ptr;
+    long long result = static_cast<long long>(
+        std::strtold(str.c_str(), &ptr));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+long long stold(const wstr &str, size_t *pos = nullptr)
+{
+    wstr::pointer ptr;
+    long long result = static_cast<long long>(
+        std::wcstold(str.c_str(), &ptr));
+
+    if (pos != nullptr)
+    {
+        *pos = str.c_str() - ptr;
+    }
+
+    return result;
+}
+
 STR_NAMESPACE_MAIN_END

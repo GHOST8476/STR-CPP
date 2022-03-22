@@ -151,9 +151,7 @@ public:
     /// Indexing starts in reverse order
     STR_CONSTEXPR reverse_iterator rit(size_type index) STR_NOEXCEPT
     {
-        std::cout << "it" << std::endl;
         return reverse_iterator(it(size() - index));
-        // return reverse_iterator(iterator(data() + size() - 1 + index));
     }
     STR_CONSTEXPR const_reverse_iterator rit(size_type index) const STR_NOEXCEPT
     {
@@ -181,15 +179,15 @@ public:
     /// Returns a reverse iterator to the character following the last character of the reversed string.
     STR_CONSTEXPR reverse_iterator rend() STR_NOEXCEPT
     {
-        return rit(size()) - 1;
+        return rit(size());
     }
     STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
     {
-        return rit(size()) - 1;
+        return rit(size());
     }
     STR_CONSTEXPR const_reverse_iterator crend() const STR_NOEXCEPT
     {
-        return crit(size()) - 1;
+        return crit(size());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1071,7 +1069,6 @@ public:
 
     STR_CONSTEXPR this_t operator--(int) STR_NOEXCEPT
     {
-        std::cout << "minus" << std::endl;
         this_t tmp = *this;
         base_t::operator--();
         return tmp;

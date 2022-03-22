@@ -34,13 +34,13 @@ TEST(BaseString, Iterators)
 {
     str_t &str = derstr_t("hello world");
 
-    ASSERT_EQ(*str.begin(), 'h'); // iterator to the first element
-    ASSERT_EQ(*str.end(), 'd');   // iterator to the last element
-    ASSERT_EQ(*str.it(4), 'o');   // iterator to the index element
+    ASSERT_EQ(*str.begin(), 'h');     // iterator to the first element
+    ASSERT_EQ(*(str.end() - 1), 'd'); // iterator to the last element
+    ASSERT_EQ(*str.it(4), 'o');       // iterator to the index element
 
-    ASSERT_EQ(*str.rbegin(), 'd'); // reverse iterator to the first (last) element
-    ASSERT_EQ(*str.rend(), 'h');   // reverse iterator to the last (first) element
-    ASSERT_EQ(*str.rit(4), 'w');   // reverse iterator to the index (size() - index) element
+    ASSERT_EQ(*str.rbegin(), 'd');     // reverse iterator to the first (end()) element
+    ASSERT_EQ(*str.rit(4), 'w');       // reverse iterator to the index it(size() - index) element
+    ASSERT_EQ(*(str.rend() - 1), 'h'); // reverse iterator to the last (begin()) element
 
     ASSERT_EQ(str.toindex(str.begin() + 5), 5); // return index from iterator
 }

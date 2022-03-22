@@ -50,9 +50,5 @@ TEST(BaseString, Capacity)
     ASSERT_EQ(str.capacity(), 50);
 
     str.shrink_to_fit();
-#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
-    ASSERT_EQ(str.capacity(), 11); // TODO: make it 12 (after implementing tweak)
-#else
-    ASSERT_EQ(str.capacity(), 11);
-#endif
+    ASSERT_EQ(str.capacity(), str.size());
 }

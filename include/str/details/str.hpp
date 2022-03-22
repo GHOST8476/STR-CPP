@@ -159,7 +159,7 @@ public:
     }
     STR_CONSTEXPR const_reverse_iterator crit(size_type index) const STR_NOEXCEPT
     {
-        return const_reverse_iterator(it(size() - index));
+        return const_reverse_iterator(cit(size() - index));
     }
 
     /// Returns a reverse iterator to the first character of the reversed string.
@@ -179,15 +179,15 @@ public:
     /// Returns a reverse iterator to the character following the last character of the reversed string.
     STR_CONSTEXPR reverse_iterator rend() STR_NOEXCEPT
     {
-        return rit(size());
+        return rit(size()) - 1;
     }
-    STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
-    {
-        return rit(size());
-    }
+    // STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
+    // {
+    //     return rit(size()) - 1;
+    // }
     STR_CONSTEXPR const_reverse_iterator crend() const STR_NOEXCEPT
     {
-        return crit(size());
+        return crit(size()) - 1;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1015,19 +1015,124 @@ protected:
 template <typename Char, typename CharTraits, typename Allocator>
 class basic_str<Char, CharTraits, Allocator>::iterator : public const_iterator
 {
+    using this_t = iterator;
+    using base_t = const_iterator;
+    using source_t = basic_str<Char, CharTraits, Allocator>;
+
+public:
+    using iterator_category = typename base_t::iterator_category;
+    using value_type = typename base_t::value_type;
+    using difference_type = typename base_t::difference_type;
+    using pointer = typename source_t::pointer;
+    using reference = typename source_t::reference;
+
 public:
     STR_CONSTEXPR iterator() STR_NOEXCEPT = default;
-    STR_CONSTEXPR iterator(value_type *ptr) STR_NOEXCEPT : const_iterator{ptr} {}
+
+    STR_CONSTEXPR iterator(value_type *ptr) STR_NOEXCEPT
+        : const_iterator{ptr} {}
+
     STR_CONSTEXPR ~iterator() STR_NOEXCEPT = default;
 
     STR_NODISCARD STR_CONSTEXPR reference operator*() const STR_NOEXCEPT
     {
-        return *const_cast<pointer>(ptr_);
+        return const_cast<reference>(base_t::operator*());
     }
     STR_NODISCARD STR_CONSTEXPR pointer operator->() const STR_NOEXCEPT
     {
-        return const_cast<pointer>(ptr_);
+        return const_cast<pointer>(base_t::operator->());
     }
+
+    STR_CONSTEXPR this_t &operator++() STR_NOEXCEPT
+    {
+        base_t::operator++();
+        return *this;
+    }
+
+    STR_CONSTEXPR this_t operator++(int) STR_NOEXCEPT
+    {
+        this_t tmp = *this;
+        base_t::operator++(0);
+        return tmp;
+    }
+
+    STR_CONSTEXPR this_t &operator--() STR_NOEXCEPT
+    {
+        base_t::operator--();
+        return *this;
+    }
+
+    STR_CONSTEXPR this_t operator--(int) STR_NOEXCEPT
+    {
+        this_t tmp = *this;
+        base_t::operator--();
+        return tmp;
+    }
+
+    STR_CONSTEXPR this_t &operator+=(const difference_type offset) STR_NOEXCEPT
+    {
+        base_t::operator+=(offset);
+        return *this;
+    }
+
+    STR_CONSTEXPR this_t &operator-=(const difference_type offset) STR_NOEXCEPT
+    {
+        base_t::operator-=(offset);
+        return *this;
+    }
+
+    STR_NODISCARD STR_CONSTEXPR this_t operator+(const difference_type offset) const STR_NOEXCEPT
+    {
+        return this_t(operator->() + offset);
+    }
+
+    STR_NODISCARD STR_CONSTEXPR this_t operator-(const difference_type offset) const STR_NOEXCEPT
+    {
+        return this_t(operator->() - offset);
+    }
+
+    STR_NODISCARD STR_CONSTEXPR difference_type operator-(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t(right);
+    }
+
+    STR_NODISCARD STR_CONSTEXPR reference operator[](const difference_type offset) const STR_NOEXCEPT
+    {
+        return const_cast<reference>(base_t::operator[offset]);
+    }
+
+    STR_NODISCARD STR_CONSTEXPR bool operator==(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator==(right);
+    }
+
+#if _HAS_CXX20
+    STR_NODISCARD STR_CONSTEXPR strong_ordering operator<=>(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator<=>(right);
+    }
+#else
+    STR_NODISCARD bool operator!=(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator!=(right);
+    }
+    STR_NODISCARD bool operator<(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator<(right);
+    }
+    STR_NODISCARD bool operator>(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator>(right);
+    }
+    STR_NODISCARD bool operator<=(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator<=(right);
+    }
+    STR_NODISCARD bool operator>=(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator>=(right);
+    }
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////

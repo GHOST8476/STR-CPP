@@ -115,9 +115,18 @@ public:
     }
 
     /// Returns an iterator to the given index.
-    STR_CONSTEXPR iterator it(size_type index) STR_NOEXCEPT;
-    STR_CONSTEXPR const_iterator it(size_type index) const STR_NOEXCEPT;
-    STR_CONSTEXPR const_iterator cit(size_type index) const STR_NOEXCEPT;
+    STR_CONSTEXPR iterator it(size_type index) STR_NOEXCEPT
+    {
+        return iterator(data() + index);
+    }
+    STR_CONSTEXPR const_iterator it(size_type index) const STR_NOEXCEPT
+    {
+        return const_iterator(data() + index);
+    }
+    STR_CONSTEXPR const_iterator cit(size_type index) const STR_NOEXCEPT
+    {
+        return const_iterator(data() + index);
+    }
 
     /// Returns an iterator to the first character of the string.
     STR_CONSTEXPR iterator begin() STR_NOEXCEPT
@@ -1144,33 +1153,6 @@ public:
     }
 #endif
 };
-
-//////////////////////////////////////////////////////////////////////
-// Iterator (Member Functions)
-//////////////////////////////////////////////////////////////////////
-// it and cit needs iterator completely defined
-// so we define them here
-
-template <typename Char, typename CharTraits, typename Allocator>
-STR_CONSTEXPR typename basic_str<Char, CharTraits, Allocator>::iterator
-basic_str<Char, CharTraits, Allocator>::it(size_type index) STR_NOEXCEPT
-{
-    return iterator(data() + index);
-}
-
-template <typename Char, typename CharTraits, typename Allocator>
-STR_CONSTEXPR typename basic_str<Char, CharTraits, Allocator>::const_iterator
-basic_str<Char, CharTraits, Allocator>::it(size_type index) const STR_NOEXCEPT
-{
-    return const_iterator(data() + index);
-}
-
-template <typename Char, typename CharTraits, typename Allocator>
-STR_CONSTEXPR typename basic_str<Char, CharTraits, Allocator>::const_iterator
-basic_str<Char, CharTraits, Allocator>::cit(size_type index) const STR_NOEXCEPT
-{
-    return const_iterator(data() + index);
-}
 
 //////////////////////////////////////////////////////////////////////
 // OStream Operator

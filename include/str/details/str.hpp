@@ -181,10 +181,10 @@ public:
     {
         return rit(size()) - 1;
     }
-    // STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
-    // {
-    //     return rit(size()) - 1;
-    // }
+    STR_CONSTEXPR const_reverse_iterator rend() const STR_NOEXCEPT
+    {
+        return rit(size()) - 1;
+    }
     STR_CONSTEXPR const_reverse_iterator crend() const STR_NOEXCEPT
     {
         return crit(size()) - 1;

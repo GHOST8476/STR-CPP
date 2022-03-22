@@ -151,7 +151,9 @@ public:
     /// Indexing starts in reverse order
     STR_CONSTEXPR reverse_iterator rit(size_type index) STR_NOEXCEPT
     {
+        std::cout << "it" << std::endl;
         return reverse_iterator(it(size() - index));
+        // return reverse_iterator(iterator(data() + size() - 1 + index));
     }
     STR_CONSTEXPR const_reverse_iterator rit(size_type index) const STR_NOEXCEPT
     {
@@ -968,6 +970,11 @@ public:
         return this_t(ptr_ - offset);
     }
 
+    STR_NODISCARD STR_CONSTEXPR difference_type operator+(const this_t &right) const STR_NOEXCEPT
+    {
+        return static_cast<difference_type>(ptr_ + right.ptr_);
+    }
+
     STR_NODISCARD STR_CONSTEXPR difference_type operator-(const this_t &right) const STR_NOEXCEPT
     {
         return static_cast<difference_type>(ptr_ - right.ptr_);
@@ -1064,6 +1071,7 @@ public:
 
     STR_CONSTEXPR this_t operator--(int) STR_NOEXCEPT
     {
+        std::cout << "minus" << std::endl;
         this_t tmp = *this;
         base_t::operator--();
         return tmp;
@@ -1091,9 +1099,14 @@ public:
         return this_t(operator->() - offset);
     }
 
+    STR_NODISCARD STR_CONSTEXPR difference_type operator+(const this_t &right) const STR_NOEXCEPT
+    {
+        return base_t::operator+(right);
+    }
+
     STR_NODISCARD STR_CONSTEXPR difference_type operator-(const this_t &right) const STR_NOEXCEPT
     {
-        return base_t(right);
+        return base_t::operator-(right);
     }
 
     STR_NODISCARD STR_CONSTEXPR reference operator[](const difference_type offset) const STR_NOEXCEPT

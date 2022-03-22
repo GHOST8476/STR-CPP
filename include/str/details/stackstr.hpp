@@ -31,6 +31,10 @@ public:
     STR_CONSTEXPR basic_stackstr() STR_NOEXCEPT
     {
         data_[0] = '\0';
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+        data_[Size] = '\0';
+#endif
     }
 
     STR_CONSTEXPR ~basic_stackstr() STR_NOEXCEPT = default;
@@ -115,7 +119,12 @@ public:
     STR_CONSTEXPR void resize(size_type count, value_type c) override {}
 
 protected:
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+    Char data_[Size + 1];
+#else
     Char data_[Size];
+#endif
+
     size_type size_ = 0;
 };
 

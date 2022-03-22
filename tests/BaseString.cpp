@@ -10,26 +10,15 @@ TEST(BaseString, ElementAccess)
 {
     str_t &str = stackstr_t("hello world");
 
-    // does not perform bound checking
-    ASSERT_NO_THROW(str[50]);
+    ASSERT_NO_THROW(str[50]);                    // does not perform bound checking
+    ASSERT_THROW(str.at(50), std::out_of_range); // performs bound checking
 
-    // performs bound checking
-    ASSERT_THROW(str.at(50), std::out_of_range);
+    ASSERT_EQ(str.at(4), 'o');   // access any element
+    ASSERT_EQ(str.front(), 'h'); // first element
+    ASSERT_EQ(str.back(), 'd');  // last element
 
-    // access any element
-    ASSERT_EQ(str.at(4), 'o');
-
-    // first element
-    ASSERT_EQ(str.front(), 'h');
-
-    // last element
-    ASSERT_EQ(str.back(), 'd');
-
-    // pointer to the first element
-    ASSERT_EQ(*str.data(), str.front());
-
-    // const pointer to the first element
-    ASSERT_EQ(str.c_str(), str.data());
+    ASSERT_EQ(*str.data(), str.front()); // pointer to the first element
+    ASSERT_EQ(str.c_str(), str.data());  // const pointer to the first element
 }
 
 TEST(BaseString, Iterators)
@@ -62,7 +51,7 @@ TEST(BaseString, Capacity)
 
     str.shrink_to_fit();
 #ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
-    ASSERT_EQ(str.capacity(), 11);  // TODO: make it 12 (after implementing tweak)
+    ASSERT_EQ(str.capacity(), 11); // TODO: make it 12 (after implementing tweak)
 #else
     ASSERT_EQ(str.capacity(), 11);
 #endif

@@ -144,14 +144,22 @@ public:
         pointer ptr = nullptr;
         if (cap > 0)
         {
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+            ptr = alloc_.allocate(cap + 1);
+#else
             ptr = alloc_.allocate(cap);
+#endif
             if (ptr == nullptr)
                 return;
 
             if (cap < size_)
             {
                 std::memcpy(ptr, data_, cap - 1);
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
                 ptr[cap] = '\0';
+#endif
             }
             else
             {

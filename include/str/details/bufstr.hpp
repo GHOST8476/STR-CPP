@@ -207,7 +207,11 @@ protected:
     }
 
 protected:
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+    value_type stack_[Size + 1];
+#else
     value_type stack_[Size];
+#endif
     value_type* heap_ = nullptr;
     value_type* data_ = stack_;
     size_type size_ = 0;

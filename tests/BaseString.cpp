@@ -52,3 +52,27 @@ TEST(BaseString, Capacity)
     str.shrink_to_fit();
     ASSERT_EQ(str.capacity(), str.size());
 }
+
+TEST(BaseString, Operations_Insert)
+{
+    str_t &srcstr = stackstr_t("the source string");
+    str_t &str = stackstr_t("12345");
+
+    // using index
+    str.insert(4, 'c');
+    str.insert(4, 'c', 5);
+    str.insert(4, "test insert");
+    str.insert(4, "test insert", 7);
+    str.insert(4, srcstr.begin(), srcstr.end());
+    str.insert(4, {'t', 'e', 's', 't', ' ', 'i', 'n', 'i', 't', '-', 'l', 'i', 's', 't', ' ', 'i', 'n', 's', 'e', 'r', 't'});
+    str.insert(4, srcstr);
+
+    // using iterators
+    str.insert(str.begin() + 4, 'c');
+    str.insert(str.begin() + 4, 'c', 5);
+    str.insert(str.begin() + 4, "test insert");
+    str.insert(str.begin() + 4, "test insert", 7);
+    str.insert(str.begin() + 4, srcstr.begin(), srcstr.end());
+    str.insert(str.begin() + 4, {'t', 'e', 's', 't', ' ', 'i', 'n', 'i', 't', '-', 'l', 'i', 's', 't', ' ', 'i', 'n', 's', 'e', 'r', 't'});
+    str.insert(str.begin() + 4, srcstr);
+}

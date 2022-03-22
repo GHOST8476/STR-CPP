@@ -324,7 +324,7 @@ public:
     STR_CONSTEXPR iterator insert(const_iterator pos, value_type ch, size_type count)
     {
         auto i = toindex(pos);
-        insert(i, os, ch, count);
+        insert(i, ch, count);
         return it(i);
     }
 
@@ -364,7 +364,7 @@ public:
     }
 
     template <typename StringLike>
-    STR_CONSTEXPR basic_str &insert(const_iterator pos, const StringLike &str, size_type str_index = 0, size_type str_count = npos)
+    STR_CONSTEXPR iterator insert(const_iterator pos, const StringLike &str, size_type str_index = 0, size_type str_count = npos)
     {
         auto i = toindex(pos);
         insert(i, str, str_index, str_count);

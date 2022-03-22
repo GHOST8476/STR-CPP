@@ -141,15 +141,79 @@ public:
         if (capacity_ == cap)
             return;
 
-        if (cap <= Size && !is_stack())
+        // if stack memory is large enough, use it
+        if (cap <= Size)
         {
-            std::memset(stack_, heap_, cap);
-            stack_[cap - 1] = '\0';
-            data_ = stack_;
+            if (!is_stack())
+            {
+                std::memset(stack_, heap_, cap);
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+                stack_[cap] = '\0';
+#endif
+                data_ = stack_;
+
+                // deallocate heap
+                if (heap_)
+                {
+                    auto old_heap = heap_;
+                    auto old_capacity = capacity_;
+
+                    heap_ = nullptr;
+                    capacity_ = 0;
+
+                    alloc_.deallocate(old_heap, old_capacity);
+                }
+            }
+
             return;
         }
 
-        heap_resize_(cap);
+        // requirement is larger than stack memory,
+        // so allocate on heap
+        pointer ptr = nullptr;
+        if (cap > 0)
+        {
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+            ptr = alloc_.allocate(cap + 1);
+#else
+            ptr = alloc_.allocate(cap);
+#endif
+            if (ptr == nullptr)
+                return;
+
+            if (cap < size_)
+            {
+                std::memcpy(ptr, data_, cap - 1);
+            }
+            else
+            {
+                std::memcpy(ptr, data_, size_);
+                std::memset(ptr + cap, ch, cap - size_);
+            }
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+            ptr[cap] = '\0';
+#endif
+        }
+
+        // cache old data for exception safety
+        auto old_ptr = data_;
+        auto old_cap = capacity_;
+
+        // write new data, old data is cached
+        heap_ = ptr;
+        data_ = ptr;
+        capacity_ = cap;
+        size_ = std::min(size_, capacity_);
+
+        // use old data, new data is written already,
+        // an exception will have no effect now
+        if (old_ptr)
+        {
+            alloc_.deallocate(old_ptr, old_cap);
+        }
     }
 
     STR_CONSTEXPR bool is_stack() const STR_NOEXCEPT
@@ -163,57 +227,13 @@ public:
     }
 
 protected:
-    STR_CONSTEXPR void heap_resize_(size_type cap, value_type ch) override
-    {
-        assert_length_(cap);
-
-        if (capacity_ == cap)
-            return;
-
-        pointer ptr = nullptr;
-        if (cap > 0)
-        {
-            ptr = alloc_.allocate(cap);
-            if (ptr == nullptr)
-                return;
-
-            if (cap < size_)
-            {
-                std::memcpy(ptr, data_, cap - 1);
-                ptr[cap] = '\0';
-            }
-            else
-            {
-                std::memcpy(ptr, data_, size_);
-                std::memset(ptr + cap, ch, cap - size_);
-            }
-        }
-
-        // cache old data for exception safety
-        auto old_ptr = data_;
-        auto old_cap = capacity_;
-
-        // write new data, old data is cached
-        data_ = ptr;
-        capacity_ = cap;
-        size_ = std::min(size_, capacity_);
-
-        // use old data, new data is written already,
-        // an exception will have no effect now
-        if (old_ptr)
-        {
-            alloc_.deallocate(old_ptr, old_cap);
-        }
-    }
-
-protected:
 #ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
     value_type stack_[Size + 1];
 #else
     value_type stack_[Size];
 #endif
-    value_type* heap_ = nullptr;
-    value_type* data_ = stack_;
+    value_type *heap_ = nullptr;
+    value_type *data_ = stack_;
     size_type size_ = 0;
     size_type capacity_ = 0;
     Allocator alloc_;

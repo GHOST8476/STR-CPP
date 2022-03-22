@@ -195,7 +195,7 @@ public:
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// Checks whether the string is empty.
-    STR_NODISCARD STR_CONSTEXPR const_pointer empty() const STR_NOEXCEPT
+    STR_NODISCARD STR_CONSTEXPR bool empty() const STR_NOEXCEPT
     {
         return size() == 0;
     }

@@ -1,12 +1,14 @@
 #include <gtest/gtest.h>
 #include <str/stackstr>
+#include <str/heapstr>
 
 using str_t = str::basic_str<char>;
-using derstr_t = str::basic_stackstr<200, char>;
+using stackstr_t = str::basic_stackstr<200, char>;
+using heapstr_t = str::basic_heapstr<char>;
 
 TEST(BaseString, ElementAccess)
 {
-    str_t &str = derstr_t("hello world");
+    str_t &str = stackstr_t("hello world");
 
     // does not perform bound checking
     ASSERT_NO_THROW(str[50]);
@@ -32,7 +34,7 @@ TEST(BaseString, ElementAccess)
 
 TEST(BaseString, Iterators)
 {
-    str_t &str = derstr_t("hello world");
+    str_t &str = stackstr_t("hello world");
 
     ASSERT_EQ(*str.begin(), 'h');     // iterator to the first element
     ASSERT_EQ(*(str.end() - 1), 'd'); // iterator to the last element
@@ -43,4 +45,25 @@ TEST(BaseString, Iterators)
     ASSERT_EQ(*(str.rend() - 1), 'h'); // reverse iterator to the last (begin()) element
 
     ASSERT_EQ(str.toindex(str.begin() + 5), 5); // return index from iterator
+}
+
+TEST(BaseString, Capacity)
+{
+    str_t &str1 = heapstr_t();
+    ASSERT_EQ(str1.empty(), true);
+
+    str_t &str = heapstr_t("hello world");
+    ASSERT_EQ(str.size(), 11);
+    ASSERT_EQ(str.length(), 11);
+    ASSERT_EQ(str.capacity(), 11);
+
+    str.reserve(50);
+    ASSERT_EQ(str.capacity(), 50);
+
+    str.shrink_to_fit();
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+    ASSERT_EQ(str.capacity(), 11);  // TODO: make it 12 (after implementing tweak)
+#else
+    ASSERT_EQ(str.capacity(), 11);
+#endif
 }

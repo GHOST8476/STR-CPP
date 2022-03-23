@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "details.hpp"
 #include <type_traits>
 #include <exception>
 #include <stdexcept>

@@ -128,6 +128,10 @@ protected:
     size_type size_ = 0;
 };
 
+//////////////////////////////////////////////////////////////////////
+// TypeDefs
+//////////////////////////////////////////////////////////////////////
+
 template <size_t Size>
 using stackstr = basic_stackstr<Size, char>;
 
@@ -142,5 +146,17 @@ using u16stackstr = basic_stackstr<Size, char16_t>;
 
 template <size_t Size>
 using u32stackstr = basic_stackstr<Size, char32_t>;
+
+//////////////////////////////////////////////////////////////////////
+// Numeric Conversions
+//////////////////////////////////////////////////////////////////////
+
+template <class Int>
+stackstr<21> to_stackstr(Int value)
+{
+    stackstr<21> str; // can hold -2^63 and 2^64 - 1, plus NUL
+    details::convert_num_to_str(str.data(), str.size(), value);
+    return str;
+}
 
 STR_NAMESPACE_MAIN_END

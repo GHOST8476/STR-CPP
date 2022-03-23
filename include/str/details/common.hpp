@@ -10,6 +10,12 @@
     {
 #define STR_NAMESPACE_MAIN_END }
 
+#define STR_NAMESPACE_DETAILS details
+#define STR_NAMESPACE_DETAILS_BEGIN \
+    namespace STR_NAMESPACE_DETAILS \
+    {
+#define STR_NAMESPACE_DETAILS_END }
+
 ///////////////////////////////////////////////////////////////////
 // Namespaces
 ///////////////////////////////////////////////////////////////////

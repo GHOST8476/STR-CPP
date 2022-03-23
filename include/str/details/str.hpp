@@ -242,6 +242,11 @@ public:
         resize(size());
     }
 
+    STR_CONSTEXPR allocator_type get_allocator() const STR_NOEXCEPT
+    {
+        return allocator_type();
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// OPERATIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -901,7 +906,7 @@ protected:
     STR_CONSTEXPR void resize_and_overwrite(size_type count, Operation op);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// search
+    /// SEARCH
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////
@@ -940,34 +945,396 @@ protected:
     {
         assert_range_(index);
 
-        const_pointer ptr = traits_type::find(data(), size() - index, ch);
-        if (ptr == nullptr)
-            return npos;
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i < len; i++)
+        {
+            if (traits_type::eq(ptr[i], ch))
+                return i;
+        }
 
-        return ptr - data();
+        return npos;
     }
 
     STR_CONSTEXPR size_type find_(const value_type *s, size_type index, size_type count) const
     {
         assert_range_(index);
 
-        auto pos = index;
-        auto data_ptr = data();
+        auto ptr = data();
         auto len = size();
 
-        while (pos < len - count)
+        for (; index < len - count, index++)
         {
             // find first character
-            const_pointer ptr = traits_type::find(data_ptr, size() - index, ch);
-            if (ptr == nullptr) // return failure if first character not found
+            for (size_type i = index; i < len; i++)
+            {
+                if (traits_type::eq(ptr[i], ch))
+                    return i;
+            }
+
+            // fail if even the first character was not found
+            if (ptr == nullptr)
                 return npos;
 
-            pos = ptr - data_ptr;
             // if found compare the string
-            if (traits_type::compare(data_ptr, s, count) == 0)
-                return pos;
+            if (traits_type::compare(ptr, s, count) == 0)
+                return index;
+        }
 
-            pos++;
+        return npos;
+    }
+
+public:
+    //////////////////////////////////////////////////////////////////////
+    /// rfind
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR size_type rfind(value_type ch, size_type index = npos) const STR_NOEXCEPT
+    {
+        return rfind_(ch, index);
+    }
+
+    STR_CONSTEXPR size_type rfind(const value_type *s, size_type index = npos) const
+    {
+        return rfind_(s, index, traits_type::length(s));
+    }
+
+    STR_CONSTEXPR size_type rfind(const value_type *s, size_type index, size_type count) const
+    {
+        return rfind_(s, index, count);
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR size_type rfind(const StringLike &str, size_type index = npos, size_type count = npos) const STR_NOEXCEPT
+    {
+        index = std::min(count, getsize_(str) - 1);
+
+        auto len = getsize_(str);
+        if (count == npos || count > len - index)
+        {
+            count = len;
+        }
+
+        return rfind_(getptr_(str), index, count);
+    }
+
+protected:
+    STR_CONSTEXPR size_type rfind_(const value_type ch, size_type index) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        for (size_type i = index; i >= 0; i--)
+        {
+            if (traits_type::eq(ptr[i], ch))
+                return i;
+        }
+
+        return npos;
+    }
+
+    STR_CONSTEXPR size_type rfind_(const value_type *s, size_type index, size_type count) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+
+        for (; index > count; index--)
+        {
+            // find first character
+            for (size_type i = len; i >= 0; i--)
+            {
+                if (traits_type::eq(ptr[i], ch))
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            // fail if even the first character was not found
+            if (index == npos)
+                return npos;
+
+            // if found compare the string
+            if (traits_type::compare(ptr + index, s, count) == 0)
+                return index;
+        }
+
+        return npos;
+    }
+
+public:
+    //////////////////////////////////////////////////////////////////////
+    /// find_first_of
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR size_type find_first_of(value_type ch, size_type index = 0) const STR_NOEXCEPT
+    {
+        return find_first_of_(ch, index);
+    }
+
+    STR_CONSTEXPR size_type find_first_of(const value_type *s, size_type index = 0) const
+    {
+        return find_first_of_(s, index, traits_type::length(s));
+    }
+
+    STR_CONSTEXPR size_type find_first_of(const value_type *s, size_type index, size_type count) const
+    {
+        return find_first_of_(s, index, count);
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR size_type find_first_of(const StringLike &str, size_type index = 0, size_type count = npos) const STR_NOEXCEPT
+    {
+        auto len = getsize_(str);
+        if (count == npos || count > len - index)
+        {
+            count = len;
+        }
+
+        return find_first_of_(getptr_(str), index, count);
+    }
+
+protected:
+    STR_CONSTEXPR size_type find_first_of_(const value_type ch, size_type index) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i < len; i++)
+        {
+            if (traits_type::eq(ptr[i], ch))
+                return i;
+        }
+
+        return npos;
+    }
+
+    STR_CONSTEXPR size_type find_first_of_(const value_type *s, size_type index, size_type count) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i < len; i++)
+            for (size_type j = 0; j < count; j++)
+            {
+                if (traits_type::eq(ptr[i], s[j]))
+                    return i;
+            }
+
+        return npos;
+    }
+
+public:
+    //////////////////////////////////////////////////////////////////////
+    /// find_first_not_of
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR size_type find_first_not_of(value_type ch, size_type index = 0) const STR_NOEXCEPT
+    {
+        return find_first_not_of_(ch, index);
+    }
+
+    STR_CONSTEXPR size_type find_first_not_of(const value_type *s, size_type index = 0) const
+    {
+        return find_first_not_of_(s, index, traits_type::length(s));
+    }
+
+    STR_CONSTEXPR size_type find_first_not_of(const value_type *s, size_type index, size_type count) const
+    {
+        return find_first_not_of_(s, index, count);
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR size_type find_first_not_of(const StringLike &str, size_type index = 0, size_type count = npos) const STR_NOEXCEPT
+    {
+        auto len = getsize_(str);
+        if (count == npos || count > len - index)
+        {
+            count = len;
+        }
+
+        return find_first_not_of_(getptr_(str), index, count);
+    }
+
+protected:
+    STR_CONSTEXPR size_type find_first_not_of_(const value_type ch, size_type index) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i < len; i++)
+        {
+            if (traits_type::eq(ptr[i], ch) == false)
+                return i;
+        }
+
+        return npos;
+    }
+
+    STR_CONSTEXPR size_type find_first_not_of_(const value_type *s, size_type index, size_type count) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i < len; i++)
+        {
+            bool matched = false;
+            for (size_type j = 0; j < count; j++)
+            {
+                if (traits_type::eq(ptr[i], s[j]))
+                {
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (matched == false)
+                return i;
+        }
+
+        return npos;
+    }
+
+public:
+    //////////////////////////////////////////////////////////////////////
+    /// find_last_of
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR size_type find_last_of(value_type ch, size_type index = npos) const STR_NOEXCEPT
+    {
+        return find_last_of_(ch, index);
+    }
+
+    STR_CONSTEXPR size_type find_last_of(const value_type *s, size_type index = npos) const
+    {
+        return find_last_of_(s, index, traits_type::length(s));
+    }
+
+    STR_CONSTEXPR size_type find_last_of(const value_type *s, size_type index, size_type count) const
+    {
+        return find_last_of_(s, index, count);
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR size_type find_last_of(const StringLike &str, size_type index = npos, size_type count = npos) const STR_NOEXCEPT
+    {
+        index = std::min(index, getsize_(str) - 1);
+
+        auto len = getsize_(str);
+        if (count == npos || count > len - index)
+        {
+            count = len;
+        }
+
+        return find_last_of_(getptr_(str), index, count);
+    }
+
+protected:
+    STR_CONSTEXPR size_type find_last_of_(const value_type ch, size_type index) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i >= 0; i--)
+        {
+            if (traits_type::eq(ptr[i], ch))
+                return i;
+        }
+
+        return npos;
+    }
+
+    STR_CONSTEXPR size_type find_last_of_(const value_type *s, size_type index, size_type count) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i >= 0; i--)
+            for (size_type j = 0; j < count; j++)
+            {
+                if (traits_type::eq(ptr[i], s[j]))
+                    return i;
+            }
+
+        return npos;
+    }
+
+public:
+    //////////////////////////////////////////////////////////////////////
+    /// find_last_not_of
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR size_type find_last_not_of(value_type ch, size_type index = 0) const STR_NOEXCEPT
+    {
+        return find_last_not_of_(ch, index);
+    }
+
+    STR_CONSTEXPR size_type find_last_not_of(const value_type *s, size_type index = 0) const
+    {
+        return find_last_not_of_(s, index, traits_type::length(s));
+    }
+
+    STR_CONSTEXPR size_type find_last_not_of(const value_type *s, size_type index, size_type count) const
+    {
+        return find_last_not_of_(s, index, count);
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR size_type find_last_not_of(const StringLike &str, size_type index = 0, size_type count = npos) const STR_NOEXCEPT
+    {
+        auto len = getsize_(str);
+        if (count == npos || count > len - index)
+        {
+            count = len;
+        }
+
+        return find_last_not_of_(getptr_(str), index, count);
+    }
+
+protected:
+    STR_CONSTEXPR size_type find_last_not_of_(const value_type ch, size_type index) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i >= 0; i--)
+        {
+            if (traits_type::eq(ptr[i], ch) == false)
+                return i;
+        }
+
+        return npos;
+    }
+
+    STR_CONSTEXPR size_type find_last_not_of_(const value_type *s, size_type index, size_type count) const
+    {
+        assert_range_(index);
+
+        auto ptr = data();
+        auto len = size();
+        for (size_type i = index; i >= 0; i--)
+        {
+            bool matched = false;
+            for (size_type j = 0; j < count; j++)
+            {
+                if (traits_type::eq(ptr[i], s[j]))
+                {
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (matched == false)
+                return i;
         }
 
         return npos;

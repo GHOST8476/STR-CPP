@@ -605,6 +605,108 @@ public:
     }
 
     //////////////////////////////////////////////////////////////////////
+    /// Assign
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR basic_str &assign(value_type ch)
+    {
+        assign_(ch, 1);
+        return *this;
+    }
+    STR_CONSTEXPR basic_str &assign(value_type ch, size_type count)
+    {
+        assign_(ch, count);
+        return *this;
+    }
+
+    STR_CONSTEXPR basic_str &assign(const value_type *s)
+    {
+        assign_(s, traits_type::length(s));
+        return *this;
+    }
+    STR_CONSTEXPR basic_str &assign(const value_type *s, size_type count)
+    {
+        assign_(s, count);
+        return *this;
+    }
+
+    template <typename InputIt>
+    STR_CONSTEXPR basic_str &assign(InputIt first, InputIt last)
+    {
+        assign_(first, std::distance(first, last));
+        return *this;
+    }
+    STR_CONSTEXPR basic_str &assign(std::initializer_list<value_type> ilist)
+    {
+        assign_(ilist.begin(), ilist.size());
+        return *this;
+    }
+
+    STR_CONSTEXPR basic_str &assign(basic_str &&str);
+
+    template <typename StringLike>
+    STR_CONSTEXPR basic_str &assign(const StringLike &str)
+    {
+        assign_(getptr_(str), getsize_(str));
+        return *this;
+    }
+    template <typename StringLike>
+    STR_CONSTEXPR basic_str &assign(const StringLike &str, size_type pos, size_type count = npos)
+    {
+        auto len = getsize_(str);
+        if (count == npos || count > len - pos)
+        {
+            count = len;
+        }
+
+        assign_(getptr_(str) + pos, count);
+        return *this;
+    }
+
+protected:
+    STR_CONSTEXPR void assign_(value_type ch, size_type count)
+    {
+        struct it
+        {
+            value_type ch;
+            operator*() { return ch; }
+            operator++(int) { }
+        };
+
+        // pass as iterator
+        assign_<it>(it(ch), count);
+    }
+
+    STR_CONSTEXPR void assign_(const value_type *s, size_type count)
+    {
+        // pass as iterator
+        assign_<const value_type *>(s, count);
+    }
+
+    STR_CONSTEXPR void assign_(InputIt first, size_type count)
+    {
+        assert_length_(count);
+        if(capacity() < count)
+        {
+            reserve(count);
+        }
+
+        assert_space_(count);
+
+        /// write string
+        auto ptr = data();
+        for (size_type i = 0; i < count; i++)
+        {
+            ptr[i] = *it;
+            it++;
+        }
+
+#ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
+        ptr[count] = '\0';
+#endif
+    }
+
+    //////////////////////////////////////////////////////////////////////
     /// Compare
     //////////////////////////////////////////////////////////////////////
 
@@ -1159,7 +1261,7 @@ public:
 // OStream Operator
 //////////////////////////////////////////////////////////////////////
 
-template <class Char, class CharTraits, class Allocator>
+template <typename Char, typename CharTraits, typename Allocator>
 std::basic_ostream<Char, CharTraits> &
 operator<<(std::basic_ostream<Char, CharTraits> &os,
            const basic_str<Char, CharTraits, Allocator> &str)
@@ -1181,7 +1283,7 @@ operator<<(std::basic_ostream<Char, CharTraits> &os,
 // IStream Operator
 //////////////////////////////////////////////////////////////////////
 
-template <class Char, class CharTraits, class Allocator>
+template <typename Char, typename CharTraits, typename Allocator>
 std::basic_istream<Char, CharTraits> &
 operator>>(std::basic_istream<Char, CharTraits> &is,
            basic_str<Char, CharTraits, Allocator> &str)

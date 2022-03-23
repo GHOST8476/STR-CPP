@@ -151,7 +151,7 @@ using u32stackstr = basic_stackstr<Size, char32_t>;
 // Numeric Conversions
 //////////////////////////////////////////////////////////////////////
 
-template <class Int>
+template <typename Int>
 stackstr<21> to_stackstr(Int value)
 {
     stackstr<21> str; // can hold -2^63 and 2^64 - 1, plus NUL

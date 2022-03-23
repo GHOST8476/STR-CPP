@@ -769,7 +769,7 @@ protected:
     /// Resize_and_overwrite
     //////////////////////////////////////////////////////////////////////
 
-    template <class Operation>
+    template <typename Operation>
     STR_CONSTEXPR void resize_and_overwrite(size_type count, Operation op);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -795,7 +795,7 @@ protected:
         return find_(s, index, count);
     }
 
-    template <class StringLike>
+    template <typename StringLike>
     STR_CONSTEXPR size_type find(const StringLike &str, size_type index = 0, size_type count = npos) const STR_NOEXCEPT
     {
         auto len = getsize_(str);

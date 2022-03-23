@@ -17,18 +17,18 @@ public:
     class const_iterator;
 
 protected:
-    using alloc_t = Allocator;
-    using alloc_traits_t = std::allocator_traits<alloc_t>;
+    using allocator_type = Allocator;
+    using allocator_traits_t = std::allocator_traits<allocator_type>;
 
 public:
     using value_type = Char;
     using traits_type = CharTraits;
-    using size_type = typename alloc_traits_t::size_type;
-    using difference_type = typename alloc_traits_t::difference_type;
+    using size_type = typename allocator_traits_t::size_type;
+    using difference_type = typename allocator_traits_t::difference_type;
     using reference = value_type &;
     using const_reference = const value_type &;
-    using pointer = typename alloc_traits_t::pointer;
-    using const_pointer = typename alloc_traits_t::const_pointer;
+    using pointer = typename allocator_traits_t::pointer;
+    using const_pointer = typename allocator_traits_t::const_pointer;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -670,7 +670,7 @@ protected:
         {
             value_type ch;
             operator*() { return ch; }
-            operator++(int) { }
+            operator++(int) {}
         };
 
         // pass as iterator
@@ -683,10 +683,11 @@ protected:
         assign_<const value_type *>(s, count);
     }
 
+    template <typename InputIt>
     STR_CONSTEXPR void assign_(InputIt first, size_type count)
     {
         assert_length_(count);
-        if(capacity() < count)
+        if (capacity() < count)
         {
             reserve(count);
         }
@@ -704,6 +705,31 @@ protected:
 #ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
         ptr[count] = '\0';
 #endif
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    /// Operator =
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR basic_str &operator=(value_type ch)
+    {
+        return assign(ch);
+    }
+
+    STR_CONSTEXPR basic_str &operator=(const value_type *s)
+    {
+        return assign(s);
+    }
+
+    STR_CONSTEXPR basic_str &operator=(std::initializer_list<value_type> ilist)
+    {
+        return assign(ilist);
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR basic_str &operator=(const StringLike &str)
+    {
+        return assign(str);
     }
 
     //////////////////////////////////////////////////////////////////////

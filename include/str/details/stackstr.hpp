@@ -3,7 +3,8 @@
 
 STR_NAMESPACE_MAIN_BEGIN
 
-template <size_t Size, typename Char, typename CharTraits = std::char_traits<char>>
+template <size_t Size, typename Char, typename CharTraits = std::char_traits<char>,
+          typename Allocator = std::allocator<Char>>
 class basic_stackstr : public basic_str<Char, CharTraits, std::allocator<Char>>
 {
     using this_t = basic_stackstr<Size, Char, CharTraits>;
@@ -12,6 +13,8 @@ public:
     using base_t = basic_str<Char, CharTraits, std::allocator<Char>>;
     using value_type = typename base_t::value_type;
     using traits_type = typename base_t::traits_type;
+    using allocator_type = typename base_t::allocator_type;
+    using allocator_traits = typename base_t::allocator_traits;
     using size_type = typename base_t::size_type;
     using difference_type = typename base_t::difference_type;
     using reference = typename base_t::reference;
@@ -117,6 +120,16 @@ public:
     //////////////////////////////////////////////////////////////////////
 
     STR_CONSTEXPR void resize(size_type count, value_type c) override {}
+
+    //////////////////////////////////////////////////////////////////////
+    // operator +
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR basic_str<Char, CharTraits, Allocator>
+    operator_plus_(const Char *s, size_type count) override
+    {
+        return this_t(s, count);
+    }
 
 protected:
 #ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE

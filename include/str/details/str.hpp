@@ -16,19 +16,16 @@ public:
     class iterator;
     class const_iterator;
 
-protected:
-    using allocator_type = Allocator;
-    using allocator_traits_t = std::allocator_traits<allocator_type>;
-
-public:
     using value_type = Char;
     using traits_type = CharTraits;
-    using size_type = typename allocator_traits_t::size_type;
-    using difference_type = typename allocator_traits_t::difference_type;
+    using allocator_type = Allocator;
+    using allocator_traits = std::allocator_traits<allocator_type>;
+    using size_type = typename allocator_traits::size_type;
+    using difference_type = typename allocator_traits::difference_type;
     using reference = value_type &;
     using const_reference = const value_type &;
-    using pointer = typename allocator_traits_t::pointer;
-    using const_pointer = typename allocator_traits_t::const_pointer;
+    using pointer = typename allocator_traits::pointer;
+    using const_pointer = typename allocator_traits::const_pointer;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -38,9 +35,9 @@ public:
     //////////////////////////////////////////////////////////////////////
     // BASE
     //////////////////////////////////////////////////////////////////////
-    basic_str &base()
+    STR_CONSTEXPR basic_str &base() const STR_NOEXCEPT
     {
-        return static_cast<basic_str &>(*this);
+        return *this;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1340,6 +1337,34 @@ protected:
         return npos;
     }
 
+public:
+    //////////////////////////////////////////////////////////////////////
+    // operator +
+    //////////////////////////////////////////////////////////////////////
+
+    STR_CONSTEXPR basic_str<Char, CharTraits, Allocator>
+    operator+(Char ch)
+    {
+        return operator_plus_(ch);
+    }
+
+    STR_CONSTEXPR_VFUNC basic_str<Char, CharTraits, Allocator>
+    operator+(const Char *s)
+    {
+        return operator_plus_(s, traits_type::length(s));
+    }
+
+    template <typename StringLike>
+    STR_CONSTEXPR basic_str<Char, CharTraits, Allocator>
+    operator+(const StringLike &str)
+    {
+        return operator_plus_(getptr_(str), getsize_(str));
+    }
+
+protected:
+    STR_CONSTEXPR_VFUNC basic_str<Char, CharTraits, Allocator>
+    operator_plus_(const Char *s, size_type count) = 0;
+
 protected:
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Assertions
@@ -1649,6 +1674,24 @@ public:
     }
 #endif
 };
+
+//////////////////////////////////////////////////////////////////////
+// operator +
+//////////////////////////////////////////////////////////////////////
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_str<Char, CharTraits, Allocator>
+operator+(const Char *lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
+{
+    return rhs.operator+(lhs);
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_str<Char, CharTraits, Allocator>
+operator+(Char lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
+{
+    return rhs.operator+(lhs);
+}
 
 //////////////////////////////////////////////////////////////////////
 // OStream Operator

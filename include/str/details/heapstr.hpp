@@ -192,6 +192,142 @@ protected:
     Allocator alloc_;
 };
 
+//////////////////////////////////////////////////////////////////////
+// operator +
+//////////////////////////////////////////////////////////////////////
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const basic_str<Char, CharTraits, Allocator> &lhs,
+          const basic_str<Char, CharTraits, Allocator> &rhs)
+{
+    auto str = basic_heapstr<Char, CharTraits, Allocator>(
+        lhs.size() + rhs.size());
+
+    str.append(lhs);
+    str.append(rhs);
+
+    return str;
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const basic_str<Char, CharTraits, Allocator> &lhs, const Char *rhs)
+{
+    auto lhslen = CharTraits::length(rhs);
+    auto str = basic_heapstr<Char, CharTraits, Allocator>(
+        lhs.size() + lhslen);
+
+    str.append(lhs);
+    str.append(rhs, lhslen);
+
+    return str;
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const basic_str<Char, CharTraits, Allocator> &lhs, Char rhs)
+{
+    auto str = basic_heapstr<Char, CharTraits, Allocator>(
+        lhs.size() + 1);
+
+    str.append(lhs);
+    str.append(rhs);
+
+    return str;
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const Char *lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
+{
+    auto lhslen = CharTraits::length(lhs);
+    auto str = basic_heapstr<Char, CharTraits, Allocator>(
+        rhs.size() + lhslen);
+
+    str.append(lhs, lhslen);
+    str.append(rhs);
+
+    return str;
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(Char lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
+{
+    auto str = basic_heapstr<Char, CharTraits, Allocator>(
+        rhs.size() + 1);
+
+    str.append(lhs);
+    str.append(rhs);
+
+    return str;
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(basic_heapstr<Char, CharTraits, Allocator> &&lhs,
+          basic_heapstr<Char, CharTraits, Allocator> &&rhs)
+{
+    auto reqcap = lhs.size() + rhs.size();
+
+    // if lhs dont have enough capacity but rhs has, move into rhs
+    if (lhs.capacity() < reqcap && rhs.capacity() > reqcap)
+    {
+        return std::move(str.insert(0, lhs));
+    }
+
+    return std::move(lhs.append(rhs));
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(basic_str<Char, CharTraits, Allocator> &&lhs,
+          const basic_str<Char, CharTraits, Allocator> &rhs)
+{
+    return std::move(lhs.append(rhs));
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(basic_str<Char, CharTraits, Allocator> &&lhs, const Char *rhs)
+{
+    return std::move(lhs.append(rhs));
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(basic_str<Char, CharTraits, Allocator> &&lhs, Char rhs)
+{
+    return std::move(lhs.append(rhs));
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const basic_str<Char, CharTraits, Allocator> &lhs,
+          basic_str<Char, CharTraits, Allocator> &&rhs)
+{
+    return std::move(rhs.insert(0, lhs));
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const Char *lhs, basic_str<Char, CharTraits, Allocator> &&rhs)
+{
+    return std::move(rhs.append(lhs));
+}
+
+template <typename Char, typename CharTraits, typename Allocator>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(Char lhs, basic_str<Char, CharTraits, Allocator> &&rhs)
+{
+    return std::move(rhs.append(lhs));
+}
+
+//////////////////////////////////////////////////////////////////////
+// typedefs
+//////////////////////////////////////////////////////////////////////
+
 using heapstr = basic_heapstr<char>;
 using wheapstr = basic_heapstr<wchar_t>;
 using u8heapstr = basic_heapstr<char8_t>;

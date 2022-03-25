@@ -121,16 +121,6 @@ public:
 
     STR_CONSTEXPR void resize(size_type count, value_type c) override {}
 
-    //////////////////////////////////////////////////////////////////////
-    // operator +
-    //////////////////////////////////////////////////////////////////////
-
-    STR_CONSTEXPR basic_str<Char, CharTraits, Allocator>
-    operator_plus_(const Char *s, size_type count) override
-    {
-        return this_t(s, count);
-    }
-
 protected:
 #ifdef STR_TWEAKS_ALWAYS_NULLTERMINATE
     Char data_[Size + 1];

@@ -1337,34 +1337,6 @@ protected:
         return npos;
     }
 
-public:
-    //////////////////////////////////////////////////////////////////////
-    // operator +
-    //////////////////////////////////////////////////////////////////////
-
-    STR_CONSTEXPR basic_str<Char, CharTraits, Allocator>
-    operator+(Char ch)
-    {
-        return operator_plus_(ch);
-    }
-
-    STR_CONSTEXPR_VFUNC basic_str<Char, CharTraits, Allocator>
-    operator+(const Char *s)
-    {
-        return operator_plus_(s, traits_type::length(s));
-    }
-
-    template <typename StringLike>
-    STR_CONSTEXPR basic_str<Char, CharTraits, Allocator>
-    operator+(const StringLike &str)
-    {
-        return operator_plus_(getptr_(str), getsize_(str));
-    }
-
-protected:
-    STR_CONSTEXPR_VFUNC basic_str<Char, CharTraits, Allocator>
-    operator_plus_(const Char *s, size_type count) = 0;
-
 protected:
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Assertions
@@ -1674,24 +1646,6 @@ public:
     }
 #endif
 };
-
-//////////////////////////////////////////////////////////////////////
-// operator +
-//////////////////////////////////////////////////////////////////////
-
-template <typename Char, typename CharTraits, typename Allocator>
-basic_str<Char, CharTraits, Allocator>
-operator+(const Char *lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
-{
-    return rhs.operator+(lhs);
-}
-
-template <typename Char, typename CharTraits, typename Allocator>
-basic_str<Char, CharTraits, Allocator>
-operator+(Char lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
-{
-    return rhs.operator+(lhs);
-}
 
 //////////////////////////////////////////////////////////////////////
 // OStream Operator

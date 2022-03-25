@@ -132,6 +132,23 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////
+// operator +
+//////////////////////////////////////////////////////////////////////
+
+template <size_t Size, size_t OtherSize, typename Char, typename CharTraits, typename Allocator>
+basic_stackstr<Size + OtherSize, Char, CharTraits, Allocator>
+operator+(const basic_stackstr<Size, Char, CharTraits, Allocator> &lhs,
+          const basic_stackstr<OtherSize, Char, CharTraits, Allocator> &rhs)
+{
+    auto str = basic_stackstr<Size + OtherSize, Char, CharTraits, Allocator>();
+
+    str.append(lhs);
+    str.append(rhs);
+
+    return str;
+}
+
+//////////////////////////////////////////////////////////////////////
 // TypeDefs
 //////////////////////////////////////////////////////////////////////
 

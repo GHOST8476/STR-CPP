@@ -196,15 +196,50 @@ protected:
 // operator +
 //////////////////////////////////////////////////////////////////////
 
-template <typename Char, typename CharTraits, typename Allocator>
+template <typename Char, typename CharTraits, typename Allocator, typename StringLike>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(const basic_str<Char, CharTraits, Allocator> &lhs,
-          const basic_str<Char, CharTraits, Allocator> &rhs)
+operator+(const basic_heapstr<Char, CharTraits, Allocator> &lhs,
+          const StringLike &rhs)
 {
+    using lhstraits = strtraits<basic_heapstr<Char, CharTraits, Allocator>>;
+    using rhstraits = strtraits<StringLike>;
+
+    static_assert(std::is_same_v<lhstraits::char_type, rhstraits::char_type>,
+                  "char_type must be same for both string types");
+
+    static_assert(std::is_same_v<lhstraits::char_traits, rhstraits::char_traits>,
+                  "char_traits must be same for both string types");
+
     auto str = basic_heapstr<Char, CharTraits, Allocator>(
-        lhs.size() + rhs.size());
+        lhstraits::size(lhs) + rhstraits::size(rhs));
 
     str.append(lhs);
+    str.append(rhstraits::data(rhs), rhstraits::size(rhs));
+
+    return str;
+}
+
+template <typename Char, typename CharTraits, typename Allocator, typename StringLike>
+basic_heapstr<Char, CharTraits, Allocator>
+operator+(const StringLike &lhs,
+          const basic_heapstr<Char, CharTraits, Allocator> &rhs)
+{
+    using lhstraits = strtraits<StringLike>;
+    using rhstraits = strtraits<basic_heapstr<Char, CharTraits, Allocator>>;
+
+    static_assert(std::is_same_v<lhstraits::char_type, rhstraits::char_type>,
+                  "char_type must be same for both string types");
+
+    static_assert(std::is_same_v<lhstraits::char_traits, rhstraits::char_traits>,
+                  "char_traits must be same for both string types");
+
+    static_assert(std::is_same_v<lhstraits::allocator_type, rhstraits::allocator_type>,
+                  "allocator_type must be same for both string types");
+
+    auto str = basic_heapstr<Char, CharTraits, Allocator>(
+        lhstraits::size(lhs) + rhstraits::size(rhs));
+
+    str.append(lhstraits::data(lhs), lhstraits::size(lhs));
     str.append(rhs);
 
     return str;
@@ -212,7 +247,7 @@ operator+(const basic_str<Char, CharTraits, Allocator> &lhs,
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(const basic_str<Char, CharTraits, Allocator> &lhs, const Char *rhs)
+operator+(const basic_heapstr<Char, CharTraits, Allocator> &lhs, const Char *rhs)
 {
     auto lhslen = CharTraits::length(rhs);
     auto str = basic_heapstr<Char, CharTraits, Allocator>(
@@ -226,7 +261,7 @@ operator+(const basic_str<Char, CharTraits, Allocator> &lhs, const Char *rhs)
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(const basic_str<Char, CharTraits, Allocator> &lhs, Char rhs)
+operator+(const basic_heapstr<Char, CharTraits, Allocator> &lhs, Char rhs)
 {
     auto str = basic_heapstr<Char, CharTraits, Allocator>(
         lhs.size() + 1);
@@ -239,7 +274,7 @@ operator+(const basic_str<Char, CharTraits, Allocator> &lhs, Char rhs)
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(const Char *lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
+operator+(const Char *lhs, const basic_heapstr<Char, CharTraits, Allocator> &rhs)
 {
     auto lhslen = CharTraits::length(lhs);
     auto str = basic_heapstr<Char, CharTraits, Allocator>(
@@ -253,7 +288,7 @@ operator+(const Char *lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(Char lhs, const basic_str<Char, CharTraits, Allocator> &rhs)
+operator+(Char lhs, const basic_heapstr<Char, CharTraits, Allocator> &rhs)
 {
     auto str = basic_heapstr<Char, CharTraits, Allocator>(
         rhs.size() + 1);
@@ -282,7 +317,7 @@ operator+(basic_heapstr<Char, CharTraits, Allocator> &&lhs,
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(basic_str<Char, CharTraits, Allocator> &&lhs,
+operator+(basic_heapstr<Char, CharTraits, Allocator> &&lhs,
           const basic_str<Char, CharTraits, Allocator> &rhs)
 {
     return std::move(lhs.append(rhs));
@@ -290,14 +325,14 @@ operator+(basic_str<Char, CharTraits, Allocator> &&lhs,
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(basic_str<Char, CharTraits, Allocator> &&lhs, const Char *rhs)
+operator+(basic_heapstr<Char, CharTraits, Allocator> &&lhs, const Char *rhs)
 {
     return std::move(lhs.append(rhs));
 }
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(basic_str<Char, CharTraits, Allocator> &&lhs, Char rhs)
+operator+(basic_heapstr<Char, CharTraits, Allocator> &&lhs, Char rhs)
 {
     return std::move(lhs.append(rhs));
 }
@@ -305,23 +340,23 @@ operator+(basic_str<Char, CharTraits, Allocator> &&lhs, Char rhs)
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
 operator+(const basic_str<Char, CharTraits, Allocator> &lhs,
-          basic_str<Char, CharTraits, Allocator> &&rhs)
+          basic_heapstr<Char, CharTraits, Allocator> &&rhs)
 {
     return std::move(rhs.insert(0, lhs));
 }
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(const Char *lhs, basic_str<Char, CharTraits, Allocator> &&rhs)
+operator+(const Char *lhs, basic_heapstr<Char, CharTraits, Allocator> &&rhs)
 {
-    return std::move(rhs.append(lhs));
+    return std::move(rhs.insert(0, lhs));
 }
 
 template <typename Char, typename CharTraits, typename Allocator>
 basic_heapstr<Char, CharTraits, Allocator>
-operator+(Char lhs, basic_str<Char, CharTraits, Allocator> &&rhs)
+operator+(Char lhs, basic_heapstr<Char, CharTraits, Allocator> &&rhs)
 {
-    return std::move(rhs.append(lhs));
+    return std::move(rhs.insert(0, lhs));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -29,17 +29,26 @@ public:
     using const_reverse_iterator = typename StringLike::const_reverse_iterator;
 
 public:
-    STR_CONSTEXPR static size_type size(const StringLike& str) STR_NOEXCEPT_IF(str.size())
+    STR_CONSTEXPR static size_type size(const StringLike &str)
+        STR_NOEXCEPT_IF(STR_NOEXCEPT_IF(str.size()))
     {
         return str.size();
     }
 
-    STR_CONSTEXPR static pointer data(const StringLike& str) STR_NOEXCEPT_IF(str.data())
+    STR_CONSTEXPR static pointer data(StringLike &str)
+        STR_NOEXCEPT_IF(STR_NOEXCEPT_IF(str.data()))
     {
         return str.data();
     }
 
-    STR_CONSTEXPR static const_pointer data(const StringLike& str) const STR_NOEXCEPT_IF(str.data())
+    STR_CONSTEXPR static pointer data(StringLike &&str)
+        STR_NOEXCEPT_IF(STR_NOEXCEPT_IF(str.data()))
+    {
+        return str.data();
+    }
+
+    STR_CONSTEXPR static const_pointer data(const StringLike &str)
+        STR_NOEXCEPT_IF(STR_NOEXCEPT_IF(str.data()))
     {
         return str.data();
     }

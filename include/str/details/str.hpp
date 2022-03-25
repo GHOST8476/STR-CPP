@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "details.hpp"
+#include "strtraits.hpp"
 #include <type_traits>
 #include <exception>
 #include <stdexcept>
@@ -35,7 +36,7 @@ public:
     //////////////////////////////////////////////////////////////////////
     // BASE
     //////////////////////////////////////////////////////////////////////
-    STR_CONSTEXPR basic_str &base() const STR_NOEXCEPT
+    STR_CONSTEXPR basic_str &base() STR_NOEXCEPT
     {
         return *this;
     }
@@ -244,6 +245,10 @@ public:
         return allocator_type();
     }
 
+protected:
+    STR_CONSTEXPR_VFUNC void set_size_(size_type size) STR_NOEXCEPT = 0;
+
+public:
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// OPERATIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,7 +266,7 @@ public:
     }
 
     //////////////////////////////////////////////////////////////////////
-    /// Insert
+    /// insert
     //////////////////////////////////////////////////////////////////////
 
     /// Inserts character ch before the character pointed by index.
@@ -309,10 +314,11 @@ public:
         return *this;
     }
 
-    template <typename String>
-    STR_CONSTEXPR basic_str &insert(size_type index, const String &str, size_type str_index = 0, size_type str_count = npos)
+    template <typename StringLike>
+    STR_CONSTEXPR basic_str &insert(size_type index, const StringLike &str, size_type str_index = 0, size_type str_count = npos)
     {
-        auto str_size = getsize_(str);
+        auto tup = getdata_(str);
+        auto str_size = std::get<1>(tup);
         assert_range_(index, 0, str_size, "'str_index' was out of range[0, str.size()] for 'str'");
 
         if (str_count == npos || str_count > str_size - str_index)
@@ -320,7 +326,7 @@ public:
             str_count = str_size - str_index;
         }
 
-        insert_(index, getptr_(str) + str_index, str_count);
+        insert_(index, std::get<0>(tup) + str_index, str_count);
         return *this;
     }
 
@@ -575,8 +581,8 @@ public:
         return insert(size(), ilist);
     }
 
-    template <typename String>
-    STR_CONSTEXPR basic_str &append(const String &str, size_type str_index = 0, size_type str_count = npos)
+    template <typename StringLike>
+    STR_CONSTEXPR basic_str &append(const StringLike &str, size_type str_index = 0, size_type str_count = npos)
     {
         return insert(size(), str, str_index, str_count);
     }
@@ -643,8 +649,6 @@ public:
         assign_(ilist.begin(), ilist.size());
         return *this;
     }
-
-    STR_CONSTEXPR basic_str &assign(basic_str &&str);
 
     template <typename StringLike>
     STR_CONSTEXPR basic_str &assign(const StringLike &str)
@@ -1377,21 +1381,61 @@ protected:
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Others
+    /// strtraits
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    STR_CONSTEXPR_VFUNC void set_size_(size_type size) STR_NOEXCEPT = 0;
-
     template <typename StringLike>
-    const_pointer getptr_(const StringLike &strlike)
+    const_pointer getptr_(const StringLike &str)
     {
-        return ::str::getptr<value_type, StringLike>(strlike);
+        using thistraits = strtraits<basic_str<Char, CharTraits, Allocator>>;
+        using othertraits = strtraits<StringLike>;
+
+        static_assert(std::is_same_v<thistraits::char_type, othertraits::char_type>,
+                      "char_type must be same for both string types");
+
+        static_assert(std::is_same_v<thistraits::char_traits, othertraits::char_traits>,
+                      "char_traits must be same for both string types");
+
+        static_assert(std::is_same_v<thistraits::allocator_type, othertraits::allocator_type>,
+                      "allocator_type must be same for both string types");
+
+        return othertraits::data(str);
     }
 
     template <typename StringLike>
-    size_type getsize_(const StringLike &strlike)
+    size_type getsize_(const StringLike &str)
     {
-        return ::str::getsize<size_type, StringLike>(strlike);
+        using thistraits = strtraits<basic_str<Char, CharTraits, Allocator>>;
+        using othertraits = strtraits<StringLike>;
+
+        static_assert(std::is_same_v<thistraits::char_type, othertraits::char_type>,
+                      "char_type must be same for both string types");
+
+        static_assert(std::is_same_v<thistraits::char_traits, othertraits::char_traits>,
+                      "char_traits must be same for both string types");
+
+        static_assert(std::is_same_v<thistraits::allocator_type, othertraits::allocator_type>,
+                      "allocator_type must be same for both string types");
+
+        return othertraits::size(str);
+    }
+
+    template <typename StringLike>
+    std::tuple<const_pointer, size_type> getdata_(const StringLike &str)
+    {
+        using thistraits = strtraits<basic_str<Char, CharTraits, Allocator>>;
+        using othertraits = strtraits<StringLike>;
+
+        static_assert(std::is_same_v<thistraits::char_type, othertraits::char_type>,
+                      "char_type must be same for both string types");
+
+        static_assert(std::is_same_v<thistraits::char_traits, othertraits::char_traits>,
+                      "char_traits must be same for both string types");
+
+        static_assert(std::is_same_v<thistraits::allocator_type, othertraits::allocator_type>,
+                      "allocator_type must be same for both string types");
+
+        return { othertraits::data(str), othertraits::size(str) };
     }
 };
 
